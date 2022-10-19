@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Schema needs updating for relationships
+//? https://www.cockroachlabs.com/blog/what-is-a-foreign-key/#:~:text=A%20foreign%20key%20column%20in,'foreign'%20column%20it%20references.
+//?https://www.prisma.io/docs/guides/general-guides/database-workflows/foreign-keys/postgresql
+model User {
+  user_id        Int        @default(autoincrement()) @id
+  user_login    String   @unique
+  user_name     String   
+  user_avatar      String 
+  games_lost Int	@default(0)
+  games_won Int		@default(0)
+  games_drawn Int	@default(0)
+  games_played Int	@default(0)
+  two_authentication String? 	  // 2FA
+  instagram String		@default("")
+  twitter String		@default("")
+  facebook String		@default("")
+  discord String		@default("")
+  online Boolean		@default(false)
+  updated Boolean		@default(false)
+  //* 1 to many relationship
+  friends Friend[]
+  match_history match_history[]
+  chat Chats[]
+  membership Members[]
+  
+  created_at DateTime @default(now())
+
+  @@map("Account") //assign a different name to a model and not a particular field.
+}
+
+model Friend {
+  id       Int @id @default(autoincrement())
+  userId   Int
+  friendId Int
+  blocked Boolean @default(false)
+  user User @relation(fields: [userId], references: [user_id])
+}
+
+model match_history {
+  match_id Int @default(autoincrement()) @id
+  userId Int @default(0)
+  opponent_id Int @default(0)
+  user_score Int @default(0)
+  opponent_score Int @default(0)
+  created_at DateTime @default(now())
+  user User @relation(fields: [userId], references: [user_id])
+  
+  // @@map("MatchHistory")
+}
+
+model Chats {
+  chat_id Int @default(autoincrement()) @id
+  userId Int @default(0)
+  to_id Int
+  // chat_type String
+  // i_delivered Boolean @default(false)
+  message String @default("")
+  created_at DateTime @default(now())
+  user User @relation(fields: [userId], references: [user_id])
+  room Room_info @relation(fields: [to_id], references: [room_id])
+  
+  // @@map("Chat")
+}
+model Room_info {
+  room_id Int @default(autoincrement()) @id
+  room_name String 
+  room_avatar String?
+  room_type String
+  password String?
+  created_at DateTime @default(now())
+  room Members[]
+  chat Chats []
+  
+  // @@map("Chat")
+}
+model Members {
+  membership_id Int @default(autoincrement()) @id
+  roomId Int 
+  userId Int 
+  prev String
+  created_at DateTime @default(now())
+  room Room_info @relation(fields: [roomId], references: [room_id])
+  user User @relation(fields: [userId], references: [user_id])
+  // @@map("Chat")
+}
