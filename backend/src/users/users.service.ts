@@ -472,18 +472,26 @@ export class UsersService {
 	}
 	async updateUserData(login : Number, userDataDto : userDataDto)
 	{
-		return await this.prisma.user.update({
-			where: {
-				user_id: Number(login),
-			},
-			data: {
-				user_avatar: userDataDto.user_avatar,
-				user_name: userDataDto.user_name,
-				facebook: userDataDto.facebook,
-				discord: userDataDto.discord,
-				instagram: userDataDto.instagram,
-			},
-		});
+        try
+        {
+
+            return await this.prisma.user.update({
+                where: {
+                    user_id: Number(login),
+                },
+                data: {
+                    user_avatar: userDataDto.user_avatar,
+                    user_name: userDataDto.user_name,
+                    facebook: userDataDto.facebook,
+                    discord: userDataDto.discord,
+                    instagram: userDataDto.instagram,
+                },
+            });
+        }
+        catch(err)
+        {
+            throw new HttpException("Invalid DATA", 400)
+        }
 	}
 
 

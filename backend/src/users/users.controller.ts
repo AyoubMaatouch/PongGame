@@ -399,7 +399,9 @@ export class UsersController {
     return await this.UsersService.updateUserData(
       Number(userRecord.user_id),
       userDataDto,
-    );
+    ).catch((err) => {
+        throw new HttpException('Invalid DATA', 400);
+    });
   }
 
   //! SHOUD BE MOVED TO CHAT CONTROLER

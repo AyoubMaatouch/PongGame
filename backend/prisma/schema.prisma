@@ -16,7 +16,7 @@ datasource db {
 model User {
   user_id        Int        @default(autoincrement()) @id
   user_login    String   @unique
-  user_name     String   
+  user_name     String   @unique
   user_avatar      String 
   games_lost Int	@default(0)
   games_won Int		@default(0)
