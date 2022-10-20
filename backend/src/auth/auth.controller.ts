@@ -75,7 +75,6 @@ export class AuthController {
 	@Post('2fa')
 	//@UseGuards(AuthGuard('jwt')) 
 	async TwoFAcheck(@Body() body: TwoFactDto, @Req() req) {
-		// after check push secrect to db
 
 		const res = await this.AuthService.verify2fa(
 			body.userToken,
