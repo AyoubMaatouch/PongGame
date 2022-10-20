@@ -11,6 +11,7 @@ import {
 	Redirect,
 	Req,
 	Res,
+	UseFilters,
 	UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -21,7 +22,9 @@ import { join } from 'path';
 import { write } from 'fs';
 import { TwoFactDto } from './DTOs/2fa.dto';
 import { twofaguard } from './guard.auth';
+import { intraExceptionFilter } from './auth-exception.filter';
 
+//https://stackoverflow.com/questions/54863655/whats-the-difference-between-interceptor-vs-middleware-vs-filter-in-nest-js
 
 @Controller('42')
 export class AuthController {
@@ -38,12 +41,13 @@ export class AuthController {
 	}
 
 	@Get('redirect')
+	@UseFilters(new intraExceptionFilter())
 	@UseGuards(AuthGuard('42'))
 	async FortyTwoAuthRedirect(
 		@Req() req,
 		@Res({ passthrough: true }) res,
-		@Query('code') code,
-	) {
+		@Query('code') code,) 
+	{
 
 		//console.log('MY current user:   => ', req.user);
 		const found = await this.AuthService.createAccount(req.user.username, req.user.avatar);
