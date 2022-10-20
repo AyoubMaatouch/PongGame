@@ -88,7 +88,7 @@ export class AuthController {
 			return (res.redirect(process.env.CLIENT_URL));
 		}
 		else
-			throw new HttpException("2fa invalid", 403);
+			throw new HttpException("2fa invalid", 403); 
 	}
 
 	@Post('signout')
