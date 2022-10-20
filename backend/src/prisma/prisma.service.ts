@@ -10,7 +10,7 @@ export class PrismaService
     super({
       datasources: {
         db: {
-          url: 'postgresql://pong:pong@localhost:5432/pongdb?schema=public',
+          url: 'postgresql://pong:pong@192.168.158.153:5432/pongdb?schema=public',
         },
       },
     });

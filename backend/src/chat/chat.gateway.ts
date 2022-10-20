@@ -97,12 +97,14 @@ export class ChatGateway
 
   @SubscribeMessage('blockUser')
   async block(client: Socket, payload: any) {
-    // this.io.to(payload.room_id).emit('recieveMessage', payload);
-    console.log('mute:  ', payload);
-    this.io.emit("blocked")
-    // ----- haydo mn database
-    // const check = await this.ChatService.pushMsg(payload);
-    // console.log('check :', check);
+    // payload {
+    //         user_id
+    //         room_id
+    // }
+    console.log('block this user :  ', payload);
+    this.io.emit("blockMe", payload)
+    //  BLOCK USER FROM DB 
+
   }
 }
 

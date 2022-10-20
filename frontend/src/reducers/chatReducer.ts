@@ -108,7 +108,6 @@ export const chatReducer = (state: any, action: any) => {
       };
 
     case "ROOM":
-        console.log("ROOM", action.data)
       return {
         ...state,
         roomDm: action.data,

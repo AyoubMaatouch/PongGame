@@ -32,6 +32,7 @@ export const getFriendInfo = async (dispatch: any, id: string | undefined) => {
     try {
         const response = await axios.get(`${URLS.USER}/${id}`);
         dispatch(storeUserInfo(response.data));
+        return response.data;
     } catch (error: any) {
         dispatch(errorMessage(error.message));
         throw error.message;

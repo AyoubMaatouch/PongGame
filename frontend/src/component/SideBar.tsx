@@ -9,6 +9,8 @@ import NewChannel from './NewChannel';
 import { ALL_USERS, API, FRIENDS_URL, GROUP, USER_URL, MY_GROUPS, ALL_GROUPS, DM } from '../constants';
 // import { GlobalContext } from "../State/GlobalProvider";
 import axios from 'axios';
+import { GlobalContext } from '../State/Provider';
+import { newNotification } from '../State/Action';
 
 const ChatTabs = () => {
     const { isSearch, toggleSearch } = useContext<any>(ChatContext);
@@ -38,9 +40,37 @@ const ChatTabs = () => {
 const SideBar = () => {
     const { selectedChat } = useContext<any>(ChatContext);
     const { newChannel } = useContext<any>(ChatContext);
-    const { dispatch, state } = useContext<any>(ChatContext);
+    const { dispatch, state, socket, setSelectedChat } = useContext<any>(ChatContext);
+    const globalDispatch = useContext<any>(GlobalContext).dispatch;
     // const { newGroups, newFriends } = state;
+    const { data } = React.useContext<any>(GlobalContext);
+    const { userInfo } = data;
 
+    React.useEffect(() => {
+        if (userInfo)
+            socket.on('blockMe', (data: any) => {
+                if (data.chat === 'G') {
+                    if (data.user_id === userInfo.user_id) {
+                        setSelectedChat(null);
+                        dispatch({
+                            type: 'REMOVE_GROUP',
+                            data: data.room_id,
+                        });
+                        globalDispatch(newNotification({ type: 'Info', message: 'You are blocked from this Channel' }));
+                    }
+                }
+                else  {
+                    if (data.user_id === userInfo.user_id) {
+                        setSelectedChat(null);
+                        dispatch({
+                            type: 'REMOVE_FRIEND',
+                            data: data.other_id,
+                        });
+                        globalDispatch(newNotification({ type: 'Info', message: 'You are blocked from this Chat' }));
+                    }
+                }
+            });
+    });
     React.useEffect(() => {
         axios.get(FRIENDS_URL).then((response: any) => {
             for (var i = 0; i < response.data.length; i++) {

@@ -11,14 +11,15 @@ import { GlobalContext } from '../State/Provider';
 import { useNavigate } from 'react-router-dom';
 
 export default function ChatPage() {
-    const { dispatch } = React.useContext<any>(GlobalContext);
+    const { dispatch, socket } = React.useContext<any>(GlobalContext);
     const navigate = useNavigate();
-    
+
     // useEffect
     React.useEffect(() => {
         getUserInfo(dispatch).catch(() => {
             navigate(pagesContent.login.url);
         });
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

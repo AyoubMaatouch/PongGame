@@ -48,6 +48,9 @@ export const GlobalReducer = (state: any, action: any) => {
         case 'USER_ID':
             newState.user_id = payload;
             break;
+        case 'CLEAR_MATCH_HISTORY':
+            newState.matchHistory = [];
+            break;
 
         default:
             break;

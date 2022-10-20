@@ -63,7 +63,6 @@ function Tabs() {
 
     function sendFriendReq(id: any) {
         const user = users.find((element: any) => element.user_id == id);
-        console.log('send f req to: ', user);
 
         axios
             .post(FRIEND_REQ + id)

@@ -183,7 +183,9 @@ export class UsersController {
       req.user['userLogin'],
     );
     const user = user_info.user_id;
-    // const user = 1;
+    console.log("user", user);
+    
+    //  HERE 
     return this.UsersService.BlockUserById(user, param).catch((err) => {
       throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
     });

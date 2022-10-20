@@ -51,3 +51,8 @@ export const storeUserId = (data: any) => ({
     type: 'USER_ID',
     payload: data,
 });
+
+export const clearMatchHistory = () => ({
+    type: 'CLEAR_MATCH_HISTORY',
+});
+

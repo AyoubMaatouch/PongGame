@@ -20,41 +20,27 @@ const MessageInput = () => {
 
     function sendMessageHandler() {
         if (typingMessage.trim()) {
-            console.log('roomDm', roomDm);
-
             const payload = {
                 room_id: selectedChat.chat === 'F' ? roomDm : selectedChat.id,
                 message: typingMessage.trim(),
                 userId: userInfo.user_id,
             };
-
-            console.log('sendMessage: ', payload);
-
             const socket = io(SOCKET + '/dm');
             socket.emit('message', payload);
             socket.on('imMuted', (payload: any) => {
-                console.log('MUTED');
-
                 globalDispatch(newNotification({ type: 'Error', message: 'You are muted for ' + payload.time + ' min' }));
             });
         }
         setTypingMessage('');
     }
 
-    // useEffect(() => {
-    //   const keyDownHandler = (event: any) => {
-    //     if (event.key === "Enter") {
-    //       event.preventDefault();
-    //       sendMessageHandler();
-    //     }
-    //   };
+    const keyDownHandler = (event: any) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
 
-    //   document.addEventListener("keydown", keyDownHandler);
-
-    //   return () => {
-    //     document.removeEventListener("keydown", keyDownHandler);
-    //   };
-    // }, []);
+            sendMessageHandler();
+        }
+    };
 
     return (
         <>
@@ -67,6 +53,7 @@ const MessageInput = () => {
                     border={'none'}
                     placeholder="Message"
                     w={'100%'}
+                    onKeyDown={keyDownHandler}
                 />
                 <IoSend color={'rgb(132,119,218)'} onClick={sendMessageHandler} size={30} />
             </HStack>

@@ -32,27 +32,36 @@ import { AiOutlineUser } from 'react-icons/ai';
 import axios from 'axios';
 import { BLOCK_DM, pagesContent } from '../constants';
 import { Link, useNavigate } from 'react-router-dom';
+import { GlobalContext } from '../State/Provider';
 
 const FriendMenu = () => {
     const { selectedChat, setSelectedChat } = useContext<any>(ChatContext);
     const value = useColorModeValue('white', 'lightBlack');
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const navigate = useNavigate();
-    const { setFriends } = useContext<any>(ChatContext);
+    const { setFriends, socket } = useContext<any>(ChatContext);
     const { dispatch } = useContext<any>(ChatContext);
+    const navigate = useNavigate();
+    const { data } = React.useContext<any>(GlobalContext);
+    const { userInfo } = data;
 
     const blockUserHandler = () => {
+        const payload = {
+            user_id: selectedChat.id,
+            room_id: '',
+            chat: 'F',
+            other_id: userInfo.user_id,
+        };
+        socket.emit('blockUser', payload);
+        dispatch({ type: 'REMOVE_FRIEND', data: selectedChat.id });
+        setSelectedChat(null);
         axios
             .post(BLOCK_DM + selectedChat.id)
             .then((response) => {
-                dispatch({ type: 'REMOVE_FRIEND', data: selectedChat.id });
-                setSelectedChat(null);
             })
             .catch(() => {
                 // navigate(pagesContent.chat.url);
                 // setSelectedChat(null)
             });
-        // setSelectedChat(null)
     };
 
     const inviteToGameHandler = () => {
@@ -61,6 +70,7 @@ const FriendMenu = () => {
 
     const viewProfileHandler = () => {
         console.log('view Profile Handler', selectedChat.id);
+        navigate(pagesContent.profile.url + '/' + selectedChat.id);
     };
 
     return (
@@ -72,9 +82,7 @@ const FriendMenu = () => {
                         <Text> Invite To Game</Text>
                     </MenuItem>
                     <MenuItem icon={<AiOutlineUser size={20} color={'green'} />} onClick={viewProfileHandler}>
-                        {/* <Link> */}
-                            <Text> View Profile </Text>
-                        {/* </Link> */}
+                        <Text> View Profile </Text>
                     </MenuItem>
                     <MenuItem icon={<MdDelete size={20} color={'#FF5C5C'} />} onClick={() => onOpen()}>
                         <Text color={'customRed'}> Block User </Text>

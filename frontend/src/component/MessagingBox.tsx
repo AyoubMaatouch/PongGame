@@ -17,6 +17,7 @@ function MessagingBox() {
     const { newFriends, newGroups, roomDm } = state;
     const { selectedChat, setSelectedChat, toggleOffSelectedChat } = useContext<any>(ChatContext);
     const { toggleDetails } = useContext<any>(ChatContext);
+   
 
     let searchIndex;
     if (selectedChat.chat === 'F') searchIndex = newFriends.findIndex((id: any) => selectedChat.id === id.id);
@@ -51,7 +52,7 @@ function MessagingBox() {
                 room_id: selectedChat.id,
             });
         }
-
+       
         socket.on('recieveMessage', (payload: any) => {
             console.log('socket on', payload);
             // if (payload.muted) {

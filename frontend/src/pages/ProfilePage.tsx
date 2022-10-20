@@ -38,6 +38,7 @@ import { getFriendInfo, getMatchHistory, getUserInfo, signOut, updatedProfile } 
 import { GlobalContext } from '../State/Provider';
 import { Achievement } from '../component/Achievement';
 import TwofacAuth from '../component/TwofacAuth';
+import { clearMatchHistory } from '../State/Action';
 
 const ProfilePage = () => {
     // page title
@@ -108,7 +109,9 @@ const ProfilePage = () => {
 
     React.useEffect(() => {
         if (userInfo) getMatchHistory(dispatch, userInfo.user_id);
-
+        return () => {
+            dispatch(clearMatchHistory());
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo]);
 
@@ -129,8 +132,13 @@ const ProfilePage = () => {
             });
 
             if (wins_row >= 2) setTwo(true);
-            if (wins_row >= 5) setThree(true);
+            if (wins_row >= 5) setTwo(true);
         }
+        return (() => {
+            setTwo(false);
+            setTwo(false);
+            setOne(false);
+        })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchHistory, userInfo]);
 
