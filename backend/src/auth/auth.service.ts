@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -39,14 +39,18 @@ export class AuthService {
 						user_avatar: avatar,
 					},
 				});				
-				console.log('User Created ', id);
+				console.log(`User ${id} Created `);
+				return User;
 			}
-			console.log('User Exists ', id);
-			return found;
+			else
+			{
+				console.log(`User ${id}  Exists `);
+				return found;
+			}
 		} 
 		catch (err: any) 
 		{
-			console.log('error ', err);
+			throw new HttpException("Prisma Error Creating account", 502)
 		}
 	}
 
@@ -95,10 +99,10 @@ async verify2fa(userToken : string, base32secret : string)
 		return await this.prisma.user.findUnique({ where: { user_login: login } });
 	}
 
-	signToken(userLogin: string) {
+	signToken(userLogin: string, twofa : boolean) {
 		const payload = {
 			userLogin: userLogin,
-			TwoFactorAuth : false
+			isAuth: twofa
 		};
 
 		const accessToken = this.jwtService.sign(payload, {

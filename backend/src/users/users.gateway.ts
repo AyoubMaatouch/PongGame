@@ -29,18 +29,22 @@ export class UsersGateway
 
   @WebSocketServer()
   io: Namespace;
-  online: any[];
+  online : any[];
 
   afterInit(server: any) {
     this.online = [];
   }
+
   userExist(user_id: any) {
-    for (let i = 0; i < this.online.length; i++) {
+    for (let i = 0; i < this.online.length; i++) 
+    {
       const user = this.online[i];
-      if (user.user_id === user_id) return true;
+      if (user.user_id === user_id)
+        return true;
     }
     return false;
   }
+
   handleConnection(client: Socket) {
     if (!this.userExist(client.handshake.query.user_id)) {
       this.online.push({
@@ -51,10 +55,13 @@ export class UsersGateway
     }
   }
 
-  handleDisconnect(client: Socket) {
-    for (let i = 0; i < this.online.length; i++) {
+  handleDisconnect(client: Socket) 
+  {
+    for (let i = 0; i < this.online.length; i++) 
+    {
       const user = this.online[i];
-      if (user.user_id === client.handshake.query.user_id.toString()) {
+      if (user.user_id === client.handshake.query.user_id.toString()) 
+      {
         this.online.splice(i, 1);
         break;
       }

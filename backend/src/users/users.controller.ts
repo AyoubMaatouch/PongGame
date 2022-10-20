@@ -60,7 +60,7 @@ export class UsersController {
     const user = user_info.user_id;
     // const user = 1;
     // here get the room for the current user
-
+      
     return this.UsersService.CheckUpdatedStatus(user).catch((err) => {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     });
