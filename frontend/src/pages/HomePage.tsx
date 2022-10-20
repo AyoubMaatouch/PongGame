@@ -1,5 +1,6 @@
 import {
-    Badge, Button,
+    Badge,
+    Button,
     Flex,
     Heading,
     List,
@@ -16,7 +17,7 @@ import {
     SliderTrack,
     Stack,
     Text,
-    useDisclosure
+    useDisclosure,
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -44,7 +45,7 @@ const HomePage = () => {
     // CONTEXT
     const { data, dispatch } = React.useContext<any>(GlobalContext);
     // state
-    const { liveMatch } = data;
+    const { liveMatch, userInfo } = data;
     const [sliderValue, setSliderValue] = React.useState(10);
     // modal
     const { isOpen, onOpen, onClose } = useDisclosure();

@@ -37,8 +37,17 @@ export const setUpdatedProfile = () => ({
     type: 'UPDATED_PROFILE',
 });
 
-export const setMatchHistory = (data:any) => ({
+export const setMatchHistory = (data: any) => ({
     type: 'UPDATE_MATCH_HISTORY',
     payload: data,
 });
 
+export const setOnlineUsers = (data: any) => ({
+    type: 'ONLINE_USERS',
+    payload: data,
+});
+
+export const storeUserId = (data: any) => ({
+    type: 'USER_ID',
+    payload: data,
+});

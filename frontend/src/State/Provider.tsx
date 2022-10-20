@@ -16,6 +16,8 @@ const GlobalContextProvider = ({ children }: Props) => {
         userInfo: null,
         matchHistory: [],
         liveMatch: [],
+        online: [],
+        user_id: null,
     };
 
     // reducer

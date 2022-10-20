@@ -1,3 +1,4 @@
+export const SOCKET_STATUS = 'http://localhost:3004';
 export const SOCKET = 'http://localhost:3003';
 export const API = 'http://localhost:3001';
 export const FRIENDS_URL = API + '/user/friends';

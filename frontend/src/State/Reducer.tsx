@@ -24,6 +24,8 @@ export const GlobalReducer = (state: any, action: any) => {
             newState.userInfo = null;
             newState.matchHistory = null;
             newState.liveMatch = [];
+            newState.online = [];
+            newState.user_id = null;
             break;
         case 'RESET_ALERT':
             newState.notification = null;
@@ -39,6 +41,12 @@ export const GlobalReducer = (state: any, action: any) => {
             break;
         case 'UPDATE_MATCH_HISTORY':
             newState.matchHistory = payload;
+            break;
+        case 'ONLINE_USERS':
+            newState.online = payload;
+            break;
+        case 'USER_ID':
+            newState.user_id = payload;
             break;
 
         default:

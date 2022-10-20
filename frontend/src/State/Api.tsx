@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API } from '../constants';
-import { completed, errorMessage, inProgress, newNotification, resetData, setMatchHistory, storeUserInfo } from './Action';
+import { completed, errorMessage, inProgress, newNotification, resetData, setMatchHistory, storeUserId, storeUserInfo } from './Action';
 
 axios.defaults.withCredentials = true;
 
@@ -18,6 +18,7 @@ export const getUserInfo = async (dispatch: any) => {
     try {
         const response = await axios.get(URLS.LOGIN);
         dispatch(storeUserInfo(response.data));
+        dispatch(storeUserId(response.data.user_id));
         return response.data;
     } catch (error: any) {
         throw error.message;
@@ -102,10 +103,10 @@ export const updatedProfile = async (dispatch: any) => {
     }
 };
 
-export const getMatchHistory = async (dispatch: any) => {
+export const getMatchHistory = async (dispatch: any, id: string) => {
     dispatch(inProgress());
     try {
-        const response = await axios.get(URLS.MATCH_HISTORY);
+        const response = await axios.get(`${URLS.MATCH_HISTORY}/${id}`);;
         dispatch(setMatchHistory(response.data));
         return response.data;
     } catch (error: any) {

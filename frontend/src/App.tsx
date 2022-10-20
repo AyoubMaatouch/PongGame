@@ -19,10 +19,10 @@ import { GlobalContext } from './State/Provider';
 
 function App() {
     // CONTEXT
-    const { data } = React.useContext<any>(GlobalContext);
+    const { data, dispatch } = React.useContext<any>(GlobalContext);
 
     // state
-    const { loader, notification } = data;
+    const { loader, notification, user_id } = data;
 
     return (
         <ChakraProvider theme={theme}>

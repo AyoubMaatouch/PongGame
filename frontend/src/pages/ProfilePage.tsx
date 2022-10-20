@@ -37,6 +37,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getFriendInfo, getMatchHistory, getUserInfo, signOut, updatedProfile } from '../State/Api';
 import { GlobalContext } from '../State/Provider';
 import { Achievement } from '../component/Achievement';
+import TwofacAuth from '../component/TwofacAuth';
 
 const ProfilePage = () => {
     // page title
@@ -61,17 +62,25 @@ const ProfilePage = () => {
     // context
     const { data, dispatch } = React.useContext<any>(GlobalContext);
     // ex
-    const { userInfo, matchHistory } = data;
+    const { userInfo, matchHistory, online } = data;
     const [updated, setUpdated] = React.useState(true);
     const [one, setOne] = React.useState(false);
     const [two, setTwo] = React.useState(false);
     const [three, setThree] = React.useState(false);
 
+    const isOnline = (user_id: string) => {
+        for (let i = 0; i < online.length; i++) {
+            const user = online[i];
+            if (user.user_id.toString() === user_id.toString()) return true;
+        }
+        return false;
+    };
+
     // useEffect
     React.useEffect(() => {
-        if (params?.user_id === 'me') {
-            getUserInfo(dispatch)
-                .then((info: any) => {
+        getUserInfo(dispatch)
+            .then((info: any) => {
+                if (params?.user_id === 'me') {
                     setMe(params?.user_id === 'me');
                     setUpdated(info?.updated);
                     if (!info?.updated) {
@@ -80,24 +89,25 @@ const ProfilePage = () => {
                             setUpdated(true);
                         });
                     }
-                })
-                .catch(() => {
-                    navigate(pagesContent.login.url);
-                });
-        } else {
-            getFriendInfo(dispatch, params?.user_id)
-                .then(() => {
-                    setMe(params?.user_id === 'me');
-                })
-                .catch(() => {
-                    navigate(pagesContent.home.url);
-                });
-        }
+                } else {
+                    getFriendInfo(dispatch, params?.user_id)
+                        .then(() => {
+                            setMe(params?.user_id === 'me');
+                        })
+                        .catch(() => {
+                            navigate(pagesContent.home.url);
+                        });
+                }
+            })
+            .catch(() => {
+                navigate(pagesContent.login.url);
+            });
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params?.user_id]);
 
     React.useEffect(() => {
-        if (userInfo) getMatchHistory(dispatch);
+        if (userInfo) getMatchHistory(dispatch, userInfo.user_id);
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo]);
@@ -106,9 +116,6 @@ const ProfilePage = () => {
         if (matchHistory && userInfo) {
             let wins_row = 0;
             matchHistory.forEach((match: any) => {
-                // one
-                console.log('match', match);
-
                 const userScore = userInfo?.user_id === match.userId ? match.user_score : match.opponent_score;
                 const opponentScore = userInfo?.user_id === match.userId ? match.opponent_score : match.user_score;
 
@@ -124,7 +131,6 @@ const ProfilePage = () => {
             if (wins_row >= 2) setTwo(true);
             if (wins_row >= 5) setThree(true);
         }
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchHistory, userInfo]);
 
@@ -146,7 +152,11 @@ const ProfilePage = () => {
                                 />
                             )}
                             <Stack spacing={5} alignItems="center" h="100%">
-                                <ProfileAvatar name={userInfo?.user_name} avatar={userInfo?.user_avatar} isOnline={userInfo?.online} />
+                                <ProfileAvatar
+                                    name={userInfo?.user_name}
+                                    avatar={userInfo?.user_avatar}
+                                    isOnline={isOnline(userInfo?.user_id)}
+                                />
 
                                 <Line maxW="10rem" />
 
@@ -183,30 +193,18 @@ const ProfilePage = () => {
                                     </ChakraLink>
                                 </HStack>
                                 {me && (
-                                    <Button
-                                        _focus={{
-                                            bg: 'gray.400',
-                                        }}
-                                        _hover={{
-                                            bg: 'gray.400',
-                                        }}
-                                        bg="gray.400"
-                                        color="blackAlpha.900"
-                                        leftIcon={<FaShieldAlt fontSize="xs" />}
-                                        borderRadius="2xl"
-                                    >
-                                        2-Factor Auth
-                                    </Button>
+                                    <TwofacAuth />
                                 )}
 
                                 <Line maxW="10rem" />
-                                <Achievement one={one} two={two} three={three} />
+                                <Spacer />
+                                {(one || two || three) && <Achievement one={one} two={two} three={three} />}
                                 <StatusProfile
                                     rate={
                                         userInfo?.games_played === 0 ? 0 : Math.round((userInfo?.games_won / userInfo?.games_played) * 100)
                                     }
                                 />
-
+                                <Spacer />
                                 {me && (
                                     <>
                                         <Line maxW="10rem" />

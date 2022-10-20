@@ -503,7 +503,7 @@ export class UsersService {
 		{
 			const userOnline =  await this.prisma.user.update({
 			where: {
-				user_id: Number(login)
+				user_login: login
 			},
 			data: {
 				online: state

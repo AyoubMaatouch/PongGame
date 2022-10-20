@@ -1,39 +1,69 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { fromEventPattern } from 'rxjs';
-import {Socket, Server} from 'socket.io';
+import { Socket, Server, Namespace } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
+import {
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from './users.service';
 
-@WebSocketGateway(3004,{namespace:'userstate', cors: {
-	origin: process.env.FRONTEND_URL,
-}})
-export class UsersGateway implements  OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-
-  
-
-  constructor(private readonly PrismaService: PrismaService, readonly UsersService : UsersService) {}
+@WebSocketGateway(3004, {
+  namespace: 'userstate',
+  cors: {
+    origin: process.env.CLIENT_URL,
+  },
+})
+export class UsersGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  constructor(
+    private readonly PrismaService: PrismaService,
+    readonly UsersService: UsersService,
+  ) {}
 
   private logger: Logger = new Logger('UsersGateway');
 
   @WebSocketServer()
-  server: Server;
-  
+  io: Namespace;
+  online: any[];
+
   afterInit(server: any) {
-    this.logger.log('Init');
+    this.online = [];
   }
-
-  handleConnection(client : Socket) {
- 
-    this.logger.log(`${client.handshake.query.login} connected: ${client.id} `); //! Add query login when connecting
-    this.UsersService.setUserState(client.handshake.query.login, true);
-
+  userExist(user_id: any) {
+    for (let i = 0; i < this.online.length; i++) {
+      const user = this.online[i];
+      if (user.user_id === user_id) return true;
+    }
+    return false;
+  }
+  handleConnection(client: Socket) {
+    if (!this.userExist(client.handshake.query.user_id)) {
+      this.online.push({
+        user_id: client.handshake.query.user_id,
+        socket_id: client.id,
+      });
+      this.io.emit('online', this.online);
+    }
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`User disconnected: ${client.id}`);
-    this.UsersService.setUserState(client.handshake.query.login, false);
+    for (let i = 0; i < this.online.length; i++) {
+      const user = this.online[i];
+      if (user.user_id === client.handshake.query.user_id.toString()) {
+        this.online.splice(i, 1);
+        break;
+      }
+    }
+    this.io.emit('online', this.online);
   }
-   
+
+  @SubscribeMessage('onlinePing')
+  canvasWidth(client: Socket) {
+    this.io.emit('online', this.online);
+  }
 }

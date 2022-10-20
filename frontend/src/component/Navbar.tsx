@@ -21,18 +21,48 @@ import Logo from './logo';
 import ToggleMode from './toggleMode';
 
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { pagesContent, tabs } from '../constants';
+import { pagesContent, SOCKET_STATUS, tabs } from '../constants';
+import { io } from 'socket.io-client';
+import { GlobalContext } from '../State/Provider';
+import { setOnlineUsers } from '../State/Action';
 
 export default function Navbar() {
     // const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [size, setSize] = React.useState<String>('md');
 
+    // CONTEXT
+    const { data, dispatch } = React.useContext<any>(GlobalContext);
+
+    // state
+    const { user_id } = data;
+
     const handleSizeClick = (newSize: String) => {
         setSize(newSize);
         onOpen();
     };
     const location = useLocation();
+
+    React.useEffect(() => {
+        const socket = io(`${SOCKET_STATUS}/userstate`, {
+            query: {
+                user_id: user_id,
+            },
+        });
+        if (user_id) {
+            const updatenline = (users: any) => {
+                dispatch(setOnlineUsers(users));
+            };
+
+            socket.on('online', updatenline);
+            socket.emit('onlinePing', updatenline);
+
+            return () => {
+                socket.off('online', updatenline);
+                socket.disconnect();
+            };
+        }
+    }, [user_id]);
 
     return (
         <Stack spacing={5} h="100%">
@@ -50,7 +80,7 @@ export default function Navbar() {
                 <Modal onClose={onClose} size={'full'} isOpen={isOpen}>
                     <ModalContent _light={{ bg: 'white' }} _dark={{ bg: '#000' }}>
                         <ModalHeader>
-                            <Link to={'/home'}>
+                            <Link to={pagesContent.home.url}>
                                 <Box onClick={onClose}>
                                     <Logo />
                                 </Box>
