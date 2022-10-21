@@ -26,7 +26,7 @@ export class accessJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   // add here a bool value to check if 2fa is enabled or not
   async validate(payload: any) {
     console.log("hnaaaa a zebi ", payload);
-    if (!payload.isAuth)
+    if (!payload.isAuth && payload.isEnabled)
       throw new HttpException("Can't Authenticate", 403)
     
     return payload;

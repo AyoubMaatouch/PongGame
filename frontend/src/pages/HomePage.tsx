@@ -62,6 +62,8 @@ const HomePage = () => {
                 }
             })
             .catch((error) => {
+                console.log("error", error);
+                
                 navigate(pagesContent.login.url);
             });
         // socket

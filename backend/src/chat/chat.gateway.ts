@@ -103,7 +103,6 @@ export class ChatGateway
     // }
     console.log('block this user :  ', payload);
     this.io.emit("blockMe", payload)
-    //  BLOCK USER FROM DB 
 
   }
 }

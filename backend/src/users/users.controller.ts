@@ -328,7 +328,14 @@ export class UsersController {
   @Get('me')
   @HttpCode(200)
   async getMe(@Req() req: Request) {
-    return await this.UsersService.getUserbyLogin(req.user['userLogin']);
+    
+   console.log("meeeee", req.user['userLogin']);
+   const user_info = await this.UsersService.getUserbyLogin(
+    req.user['userLogin'],
+  );
+  const user = user_info.user_login;
+
+    return await this.UsersService.getUserbyLogin(user);
   }
 
   @Get('match_history/:user_id')

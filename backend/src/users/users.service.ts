@@ -393,7 +393,14 @@ export class UsersService {
       },
     });
     if (!found) {
+
+        console.log("are not heeere");
       throw 'NOT FOUND';
+    }
+    else
+    {
+            console.log("are you heeere");
+            
     }
     return found;
   }

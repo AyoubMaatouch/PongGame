@@ -1,30 +1,25 @@
 import {
-    Avatar,
-    Box,
     Button,
     HStack,
-    IconButton,
+    Icon,
     Input,
-    InputGroup,
-    InputLeftAddon,
     Modal,
     ModalBody,
-    ModalCloseButton,
     ModalContent,
-    ModalFooter,
     ModalHeader,
     ModalOverlay,
     Stack,
-    Switch,
     useDisclosure,
+    Text,
+    ModalCloseButton,
 } from '@chakra-ui/react';
-import React from 'react';
-import { FaCamera, FaDiscord, FaFacebook, FaInstagram, FaRegEdit, FaShieldAlt } from 'react-icons/fa';
-import { REGEX_NUM } from '../constants';
-import { newNotification } from '../State/Action';
-import { generate2Fac, delete2Fac, updatePtofile, activate2Fac } from '../State/Api';
-import { GlobalContext } from '../State/Provider';
 import QRCode from 'qrcode';
+import React from 'react';
+import { FaShieldAlt } from 'react-icons/fa';
+import { REGEX_NUM } from '../constants';
+import { activate2Fac, delete2Fac, generate2Fac } from '../State/Api';
+import { GlobalContext } from '../State/Provider';
+import { GiCheckMark } from 'react-icons/gi';
 
 const TwofacAuth = () => {
     // modal
@@ -32,6 +27,7 @@ const TwofacAuth = () => {
     const { dispatch, data } = React.useContext<any>(GlobalContext);
     const [urlQr, setUrlQr] = React.useState('');
     const [code, setCode] = React.useState('');
+    const [twoFa, setTwoFa] = React.useState(false);
     const { userInfo } = data;
 
     const handleClose = () => {
@@ -39,7 +35,7 @@ const TwofacAuth = () => {
     };
 
     const qrBinary = (qrStr: string) => {
-        QRCode.toDataURL(qrStr, (err, url) => {
+        QRCode.toDataURL('otpauth://totp/ponGame?secret=' + qrStr, (err, url) => {
             setUrlQr(url);
             console.log(url);
         });
@@ -47,11 +43,13 @@ const TwofacAuth = () => {
     const changeCode = (e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value.replace(REGEX_NUM, ''));
     const handle2Fa = () => {
         generate2Fac(dispatch).then((qrStr: string) => {
+            setTwoFa(true);
             qrBinary(qrStr);
         });
     };
     const handle2FaDelete = () => {
         delete2Fac(dispatch).then(() => {
+            setTwoFa(false);
             handleClose();
         });
     };
@@ -59,8 +57,9 @@ const TwofacAuth = () => {
     const handle2FaActivate = () => {
         if (code.length)
             activate2Fac(dispatch, code).then(() => {
+                setTwoFa(false);
                 handleClose();
-            })
+            });
     };
 
     // first render
@@ -87,13 +86,12 @@ const TwofacAuth = () => {
                 2-Factor Auth
             </Button>
 
-            <Modal closeOnOverlayClick={false}  isOpen={isOpen} onClose={handleClose} isCentered>
+            <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={handleClose} isCentered>
                 <ModalOverlay />
                 <ModalContent borderRadius="2xl">
-                    <ModalHeader>2-Factor Auth</ModalHeader>
-                    <ModalBody pb={6}>
+                    <ModalBody py={6}>
                         <Stack alignItems="center" spacing={8}>
-                            {userInfo?.two_authentication ? (
+                            {twoFa && (
                                 <>
                                     <img src={urlQr} alt="qr code" />
                                     <Input borderRadius="xl" placeholder="code" value={code} type="text" onChange={changeCode} />
@@ -106,15 +104,27 @@ const TwofacAuth = () => {
                                         </Button>
                                     </HStack>
                                 </>
-                            ) : (
-                                <HStack alignItems="center">
-                                    <Button variant={'ghost'} colorScheme="purple" mr={3} onClick={handle2Fa}>
-                                        Activate
+                            )}
+                            {userInfo?.two_authentication && !twoFa && (
+                                <>
+                                    <ModalCloseButton />
+                                    <Icon as={GiCheckMark} color="green" fontSize="8xl" />
+                                    <Text> 2-Factor Authentication is activated</Text>
+                                    <Button variant={'ghost'} color="customRed" mr={3} onClick={handle2FaDelete}>
+                                        Delete
                                     </Button>
-                                    <Button variant={'ghost'} color="customRed" mr={3} onClick={onClose}>
-                                        Cancel
-                                    </Button>
-                                </HStack>
+                                </>
+                            )}
+                            {!userInfo?.two_authentication && !twoFa && (
+                                <>
+                                    <ModalCloseButton />
+                                    <ModalHeader>2-Factor Auth</ModalHeader>
+                                    <HStack alignItems="center">
+                                        <Button variant={'ghost'} colorScheme="purple" mr={3} onClick={handle2Fa}>
+                                            Activate
+                                        </Button>
+                                    </HStack>
+                                </>
                             )}
                         </Stack>
                     </ModalBody>

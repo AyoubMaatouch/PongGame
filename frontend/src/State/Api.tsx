@@ -15,7 +15,7 @@ import {
 
 axios.defaults.withCredentials = true;
 
-const URLS = {
+export const  URLS = {
     LOGIN: API + '/user/me',
     USER: API + '/user',
     SIGNOUT: API + '/42/signout',
@@ -23,8 +23,8 @@ const URLS = {
     UPDATED_PROFILE: API + '/user/check',
     MATCH_HISTORY: API + '/user/match_history',
     TWO_FA: API + '/42/2fa',
-    TWO_FA_DELETE: API + '/42/2fa/remove',
-    TWO_FA_ACTIVATE: API + '/42/2fa/active',
+    TWO_FA_DELETE: API + '/42/2fa/delete',
+    TWO_FA_ACTIVATE: API + '/42/2fa/activate',
 };
 
 export const getUserInfo = async (dispatch: any) => {
@@ -99,7 +99,7 @@ export const updatePtofile = async (
         dispatch(storeUserInfo(response.data));
         dispatch(newNotification({ type: 'Success', message: 'Profile updated successfuly' }));
     } catch (error: any) {
-        dispatch(errorMessage("Username already in use, hhhhh"));
+        dispatch(errorMessage('Username already in use, hhhhh'));
         throw error.message;
     } finally {
         dispatch(completed());
@@ -204,3 +204,4 @@ export const activate2Fac = async (dispatch: any, code: string) => {
         dispatch(completed());
     }
 };
+

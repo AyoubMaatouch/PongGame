@@ -16,13 +16,14 @@ import { Loading } from './component/Loading';
 import { pagesContent } from './constants';
 import LiveMatchPage from './pages/LiveMatchPage';
 import { GlobalContext } from './State/Provider';
+import TwoFacPage from './pages/TwoFacPage';
 
 function App() {
     // CONTEXT
-    const { data, dispatch } = React.useContext<any>(GlobalContext);
+    const { data } = React.useContext<any>(GlobalContext);
 
     // state
-    const { loader, notification, user_id } = data;
+    const { loader, notification } = data;
 
     return (
         <ChakraProvider theme={theme}>
@@ -40,6 +41,7 @@ function App() {
                                 <Route path={pagesContent.watch.url + '/:room_name'} element={<LiveMatchPage />} />
                             </Route>
                             <Route path={pagesContent.login.url} element={<SignInPage />} />
+                            <Route path={pagesContent.twoFa.url} element={<TwoFacPage />} />
                             <Route path="*" element={<PageNotFound />} />
                         </Routes>
                     </BrowserRouter>

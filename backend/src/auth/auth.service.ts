@@ -71,15 +71,17 @@ async generate2fa(id:string)
 			 name: 'ponGame',
 			 length: 10
 			});
+            console.log("secret ");
+            
 		const update = await this.prisma.user.update({
 			where: {
 			  user_login: id,
 			},
 			data: {
-				two_authentication: secret.otpauth_url,
+				two_authentication: secret.base32,
 			},
 		  })
-		  two_authentication = secret.otpauth_url;
+		  two_authentication = secret.base32;
 		  console.log('update :', update);
 	}
 		return (two_authentication);
@@ -88,22 +90,48 @@ async generate2fa(id:string)
 
 async verify2fa(userToken : string, base32secret : string)
 {
+    // console.log()
 	var verified = speakeasy.totp.verify({ secret: base32secret,
-		encoding: 'totp',
+		encoding: 'base32',
 		token: userToken });
 		console.log(verified);
 		return verified;
 	}
+async deleteTwoFa(user_id : string)
+{
+    // console.log()
+    try
+    {
+
+        var deleted = this.prisma.user.update(
+            {
+                where:
+                {
+                    user_login: user_id,
+                },
+                data :{
+                    two_authentication: null,
+                }
+            }
+            ) 
+            return deleted
+        }
+        catch(err)
+        {
+            throw new HttpException("ERROR", 404)
+        }
+	}
 
 
 	async findUserId(login: string) {
-		return await this.prisma.user.findUnique({ where: { user_login: login } });
+		return await this.prisma.user.findUnique({ where: { user_login: String(login) } });
 	}
 
-	signToken(userLogin: string, twofa : boolean) {
+	signToken(userLogin: string, twofa : boolean, enable : boolean) {
 		const payload = {
 			userLogin: userLogin,
-			isAuth: twofa
+			isAuth: twofa,
+            isEnabled:enable
 		};
 
 		const accessToken = this.jwtService.sign(payload, {

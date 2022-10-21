@@ -4,5 +4,5 @@ export class TwoFactDto {
     // @ApiProperty()
     // base32secret: string;
     @ApiProperty()
-    userToken: string;
+    code: string;
 }
