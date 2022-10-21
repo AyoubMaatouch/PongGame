@@ -1,6 +1,17 @@
 import axios from 'axios';
 import { API } from '../constants';
-import { clearTwoFacQrCode, completed, errorMessage, inProgress, newNotification, resetData, setMatchHistory, storeUserId, storeUserInfo, twoFacQrCode } from './Action';
+import {
+    clearTwoFacQrCode,
+    completed,
+    errorMessage,
+    inProgress,
+    newNotification,
+    resetData,
+    setMatchHistory,
+    storeUserId,
+    storeUserInfo,
+    twoFacQrCode,
+} from './Action';
 
 axios.defaults.withCredentials = true;
 
@@ -13,6 +24,7 @@ const URLS = {
     MATCH_HISTORY: API + '/user/match_history',
     TWO_FA: API + '/42/2fa',
     TWO_FA_DELETE: API + '/42/2fa/remove',
+    TWO_FA_ACTIVATE: API + '/42/2fa/active',
 };
 
 export const getUserInfo = async (dispatch: any) => {
@@ -87,7 +99,7 @@ export const updatePtofile = async (
         dispatch(storeUserInfo(response.data));
         dispatch(newNotification({ type: 'Success', message: 'Profile updated successfuly' }));
     } catch (error: any) {
-        dispatch(errorMessage(error.message));
+        dispatch(errorMessage("Username already in use, hhhhh"));
         throw error.message;
     } finally {
         dispatch(completed());
@@ -152,7 +164,7 @@ export const getUserIndoById = async (dispatch: any, id1: string, id2: string) =
     }
 };
 
-export const activate2Fac = async (dispatch: any) => {
+export const generate2Fac = async (dispatch: any) => {
     dispatch(inProgress());
     try {
         const response = await axios.get(URLS.TWO_FA);
@@ -166,11 +178,25 @@ export const activate2Fac = async (dispatch: any) => {
     }
 };
 
-export const deleteActivate2Fac = async (dispatch: any) => {
+export const delete2Fac = async (dispatch: any) => {
     dispatch(inProgress());
     try {
         await axios.post(URLS.TWO_FA_DELETE);
         dispatch(clearTwoFacQrCode());
+    } catch (error: any) {
+        dispatch(errorMessage(error.message));
+        throw error.message;
+    } finally {
+        dispatch(completed());
+    }
+};
+
+export const activate2Fac = async (dispatch: any, code: string) => {
+    dispatch(inProgress());
+    try {
+        await axios.post(URLS.TWO_FA_ACTIVATE, {
+            code,
+        });
     } catch (error: any) {
         dispatch(errorMessage(error.message));
         throw error.message;

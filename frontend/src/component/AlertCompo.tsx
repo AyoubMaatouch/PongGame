@@ -18,7 +18,7 @@ export const AlertCompo = ({ message, type }: Props) => {
     React.useEffect(() => {
         const timer = setTimeout(() => {
             dispatch(resetAlert());
-        }, 3000);
+        }, 5000);
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
