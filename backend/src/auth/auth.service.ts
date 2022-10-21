@@ -89,7 +89,7 @@ async generate2fa(id:string)
 async verify2fa(userToken : string, base32secret : string)
 {
 	var verified = speakeasy.totp.verify({ secret: base32secret,
-		encoding: 'base32',
+		encoding: 'totp',
 		token: userToken });
 		console.log(verified);
 		return verified;

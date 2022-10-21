@@ -73,14 +73,27 @@ export class AuthController {
         console.log(`result ${result}`)
 		return result;
 	}
+	@Post('2fa/activate')
+	@UseGuards(AuthGuard('jwt'))
+	@HttpCode(201)
+	async activateTwoFA(@Body() body: TwoFactDto, @Req() req) {
+			const userInfo = await this.AuthService.findUserId(req.user['userLogin'])
+			const res = await this.AuthService.verify2fa(
+				body.userToken,
+				userInfo.two_authentication,
+			);
+			if (!res)
+				throw new HttpException("Token Invalid", 401)
+	}
 
+	// only in login
 	@Post('2fa')
-	//@UseGuards(AuthGuard('jwt')) 
+	@UseGuards(AuthGuard('jwt')) 
 	async TwoFAcheck(@Body() body: TwoFactDto, @Req() req) {
-
+		const userInfo = await this.AuthService.findUserId(req.user['userLogin'])
 		const res = await this.AuthService.verify2fa(
 			body.userToken,
-			body.base32secret,
+			userInfo.two_authentication,
 		);
 		if (res)
 		{
@@ -90,7 +103,7 @@ export class AuthController {
 			return (res.redirect(process.env.CLIENT_URL));
 		}
 		else
-			throw new HttpException("2fa invalid", 403); 
+			throw new HttpException("TwoFA invalid", 403); 
 	}
 
 	@Post('signout')
