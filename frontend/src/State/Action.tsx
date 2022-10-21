@@ -64,3 +64,12 @@ export const setOpponentId = (data: any) => ({
 export const clearOpponent = () => ({
     type: 'CLEAR_OPPONENT_ID',
 });
+
+export const twoFacQrCode = (data: any) => ({
+    type: 'TWO_FAC_QRCODE',
+    payload: data,
+});
+
+export const clearTwoFacQrCode = () => ({
+    type: 'CLEAR_TWO_FAC_QRCODE',
+});

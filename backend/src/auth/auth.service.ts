@@ -62,6 +62,7 @@ async generate2fa(id:string)
 		  user_login: id,
 		},
 	  })
+      
 	var {two_authentication } = getUser;
 	
 	if (two_authentication === null)

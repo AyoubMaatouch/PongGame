@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API } from '../constants';
-import { completed, errorMessage, inProgress, newNotification, resetData, setMatchHistory, storeUserId, storeUserInfo } from './Action';
+import { clearTwoFacQrCode, completed, errorMessage, inProgress, newNotification, resetData, setMatchHistory, storeUserId, storeUserInfo, twoFacQrCode } from './Action';
 
 axios.defaults.withCredentials = true;
 
@@ -11,6 +11,8 @@ const URLS = {
     UPDATE_PROFILE: API + '/user/update/profile',
     UPDATED_PROFILE: API + '/user/check',
     MATCH_HISTORY: API + '/user/match_history',
+    TWO_FA: API + '/42/2fa',
+    TWO_FA_DELETE: API + '/42/2fa/remove',
 };
 
 export const getUserInfo = async (dispatch: any) => {
@@ -107,7 +109,7 @@ export const updatedProfile = async (dispatch: any) => {
 export const getMatchHistory = async (dispatch: any, id: string) => {
     dispatch(inProgress());
     try {
-        const response = await axios.get(`${URLS.MATCH_HISTORY}/${id}`);;
+        const response = await axios.get(`${URLS.MATCH_HISTORY}/${id}`);
         dispatch(setMatchHistory(response.data));
         return response.data;
     } catch (error: any) {
@@ -142,6 +144,33 @@ export const getUserIndoById = async (dispatch: any, id1: string, id2: string) =
             username2: response2.data.user_name,
             avatar2: response2.data.user_avatar,
         };
+    } catch (error: any) {
+        dispatch(errorMessage(error.message));
+        throw error.message;
+    } finally {
+        dispatch(completed());
+    }
+};
+
+export const activate2Fac = async (dispatch: any) => {
+    dispatch(inProgress());
+    try {
+        const response = await axios.get(URLS.TWO_FA);
+        dispatch(twoFacQrCode(response.data));
+        return response.data;
+    } catch (error: any) {
+        dispatch(errorMessage(error.message));
+        throw error.message;
+    } finally {
+        dispatch(completed());
+    }
+};
+
+export const deleteActivate2Fac = async (dispatch: any) => {
+    dispatch(inProgress());
+    try {
+        await axios.post(URLS.TWO_FA_DELETE);
+        dispatch(clearTwoFacQrCode());
     } catch (error: any) {
         dispatch(errorMessage(error.message));
         throw error.message;

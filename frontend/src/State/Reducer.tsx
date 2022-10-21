@@ -57,6 +57,12 @@ export const GlobalReducer = (state: any, action: any) => {
         case 'CLEAR_OPPONENT_ID':
             newState.opponent_id = null;
             break;
+        case 'TWO_FAC_QRCODE':
+            newState.userInfo.two_authentication = payload;
+            break;
+        case 'CLEAR_TWO_FAC_QRCODE':
+            newState.userInfo.two_authentication = null;
+            break;
 
         default:
             break;
