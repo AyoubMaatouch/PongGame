@@ -30,9 +30,11 @@ import { ChatContext } from '../State/ChatProvider';
 import { RiPingPongFill } from 'react-icons/ri';
 import { AiOutlineUser } from 'react-icons/ai';
 import axios from 'axios';
-import { BLOCK_DM, pagesContent } from '../constants';
+import { BLOCK_DM, pagesContent, SOCKET } from '../constants';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../State/Provider';
+import { io } from 'socket.io-client';
+import { setOpponentId } from '../State/Action';
 
 const FriendMenu = () => {
     const { selectedChat, setSelectedChat } = useContext<any>(ChatContext);
@@ -42,7 +44,8 @@ const FriendMenu = () => {
     const { dispatch } = useContext<any>(ChatContext);
     const navigate = useNavigate();
     const { data } = React.useContext<any>(GlobalContext);
-    const { userInfo } = data;
+    const globalDispatch = useContext<any>(GlobalContext).dispatch;
+    const { userInfo, online } = data;
 
     const blockUserHandler = () => {
         const payload = {
@@ -56,16 +59,24 @@ const FriendMenu = () => {
         setSelectedChat(null);
         axios
             .post(BLOCK_DM + selectedChat.id)
-            .then((response) => {
-            })
+            .then((response) => {})
             .catch(() => {
                 // navigate(pagesContent.chat.url);
                 // setSelectedChat(null)
             });
     };
 
+    const isOnline = (user_id: string) => {
+        for (let i = 0; i < online.length; i++) {
+            const user = online[i];
+            if (user.user_id.toString() === user_id.toString()) return true;
+        }
+        return false;
+    };
+
     const inviteToGameHandler = () => {
-        console.log('Invite to Game opp player id: ', selectedChat.id);
+        globalDispatch(setOpponentId(selectedChat.id))
+        navigate(`${pagesContent.play.url}/f`)
     };
 
     const viewProfileHandler = () => {
@@ -78,9 +89,11 @@ const FriendMenu = () => {
             <Menu>
                 <MenuButton as={IconButton} icon={<BsThreeDotsVertical />} variant="ghost" />
                 <MenuList>
-                    <MenuItem icon={<RiPingPongFill size={20} color={'yellow'} />} onClick={inviteToGameHandler}>
-                        <Text> Invite To Game</Text>
-                    </MenuItem>
+                    {isOnline(selectedChat.id) && (
+                        <MenuItem icon={<RiPingPongFill size={20} color={'yellow'} />} onClick={inviteToGameHandler}>
+                            <Text> Invite To Game</Text>
+                        </MenuItem>
+                    )}
                     <MenuItem icon={<AiOutlineUser size={20} color={'green'} />} onClick={viewProfileHandler}>
                         <Text> View Profile </Text>
                     </MenuItem>

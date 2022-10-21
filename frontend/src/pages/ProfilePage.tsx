@@ -10,12 +10,12 @@ import {
     Stack,
     useBreakpointValue,
     useMediaQuery,
-    useTheme,
+    useTheme
 } from '@chakra-ui/react';
 import React from 'react';
 
 // ICONS
-import { FaDiscord, FaFacebook, FaInstagram, FaShieldAlt } from 'react-icons/fa';
+import { FaDiscord, FaFacebook, FaInstagram } from 'react-icons/fa';
 
 // COMPONENTS
 import { Card } from '../component/Card';
@@ -34,11 +34,11 @@ import { pagesContent } from '../constants';
 
 // Context
 import { useNavigate, useParams } from 'react-router-dom';
-import { getFriendInfo, getMatchHistory, getUserInfo, signOut, updatedProfile } from '../State/Api';
-import { GlobalContext } from '../State/Provider';
 import { Achievement } from '../component/Achievement';
 import TwofacAuth from '../component/TwofacAuth';
 import { clearMatchHistory } from '../State/Action';
+import { getFriendInfo, getMatchHistory, getUserInfo, signOut, updatedProfile } from '../State/Api';
+import { GlobalContext } from '../State/Provider';
 
 const ProfilePage = () => {
     // page title
@@ -132,11 +132,11 @@ const ProfilePage = () => {
             });
 
             if (wins_row >= 2) setTwo(true);
-            if (wins_row >= 5) setTwo(true);
+            if (wins_row >= 5) setThree(true);
         }
         return (() => {
             setTwo(false);
-            setTwo(false);
+            setThree(false);
             setOne(false);
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps

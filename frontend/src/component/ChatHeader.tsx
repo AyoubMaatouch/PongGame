@@ -25,6 +25,7 @@ function ChatHeader({ avatarName, avatarSrc, chatName, isGroup, onClickCallBack,
         }
         return false;
     };
+
     return (
         <HStack w={'100%'} mr={5}>
             <HStack
@@ -40,8 +41,8 @@ function ChatHeader({ avatarName, avatarSrc, chatName, isGroup, onClickCallBack,
                 <VStack spacing={0} alignItems="left">
                     <Text>{chatName.length > 10 ? chatName.slice(0, 10) + '...' : chatName}</Text>
                     {selectedChat.chat === 'F' && (
-                        <Text fontWeight={'lighter'} fontSize={'xs'} color={isOnline(selectedChat.id) ? "green" : "red"}>
-                            {isOnline(selectedChat.id) ? "Online" : "Offline"}
+                        <Text fontWeight={'lighter'} fontSize={'xs'} color={isOnline(selectedChat.id) ? 'green' : 'red'}>
+                            {isOnline(selectedChat.id) ? 'Online' : 'Offline'}
                         </Text>
                     )}
                 </VStack>

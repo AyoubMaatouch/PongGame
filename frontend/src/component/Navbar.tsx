@@ -2,7 +2,6 @@ import { HamburgerIcon } from '@chakra-ui/icons';
 import {
     Box,
     Button,
-    Container,
     Flex,
     Modal,
     ModalBody,
@@ -21,15 +20,18 @@ import Logo from './logo';
 import ToggleMode from './toggleMode';
 
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { pagesContent, SOCKET_STATUS, tabs } from '../constants';
+import { pagesContent, SOCKET, SOCKET_STATUS, tabs } from '../constants';
 import { io } from 'socket.io-client';
 import { GlobalContext } from '../State/Provider';
 import { setOnlineUsers } from '../State/Action';
+import GameInvite from './GameInvite';
 
 export default function Navbar() {
     // const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [size, setSize] = React.useState<String>('md');
+    const [invite, setInvite] = React.useState(false);
+    const [inviteData, setInviteData] = React.useState<any>();
 
     // CONTEXT
     const { data, dispatch } = React.useContext<any>(GlobalContext);
@@ -62,10 +64,31 @@ export default function Navbar() {
                 socket.disconnect();
             };
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user_id]);
+
+    React.useEffect(() => {
+        const socket = io(`${SOCKET}/game`);
+
+        socket.on('acceptGame', (data: any) => {
+            if (user_id === data.opponent_id) {
+                setInviteData(data);
+                setInvite(true);
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user_id]);
 
     return (
         <Stack spacing={5} h="100%">
+            {invite && (
+                <GameInvite
+                    name={inviteData?.user_name}
+                    avatar={inviteData?.user_avatar}
+                    user_id={inviteData?.user_id}
+                    opponent_id={inviteData?.opponent_id}
+                />
+            )}
             <Flex mb={5} px={10} justifyContent={'right'} alignItems={'center'} overflow={'hideen'}>
                 <Show above="md">
                     <Link to={pagesContent.home.url}>

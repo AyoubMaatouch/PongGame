@@ -18,6 +18,7 @@ const GlobalContextProvider = ({ children }: Props) => {
         liveMatch: [],
         online: [],
         user_id: null,
+        opponent_id: null,
     };
 
     // reducer

@@ -1,12 +1,12 @@
 import { useMediaQuery, VStack, Grid, GridItem, HStack, Avatar, useTheme, Text, Box, Flex, Spinner, Badge, Icon } from '@chakra-ui/react';
 import React from 'react';
 import { IoEye } from 'react-icons/io5';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { pagesContent, SOCKET } from '../constants';
 import { usePageTitle } from '../hooks/usePageTitle';
 import useWindowWidth from '../hooks/useWidth';
-import { newNotification } from '../State/Action';
+import { clearOpponent, newNotification } from '../State/Action';
 import { getUserInfo } from '../State/Api';
 // import GameContextProvider from '../State/GameProvider';
 import { GlobalContext } from '../State/Provider';
@@ -25,6 +25,7 @@ export default function GamePage() {
     const [canvasWidth, setCanvasWidth] = React.useState(800);
     const [canvasNewWidth, setNewCanvasWidth] = React.useState(0);
     const [play, setPlay] = React.useState(false);
+    const [friend, setFriend] = React.useState(false);
     const [user, setUser] = React.useState({
         username: '',
         avatar: '',
@@ -43,7 +44,7 @@ export default function GamePage() {
     const containerRef = React.useRef<HTMLDivElement>(null);
     // context
     const { data, dispatch } = React.useContext<any>(GlobalContext);
-    const { userInfo } = data;
+    const { userInfo, opponent_id } = data;
 
     // useEffect
     React.useEffect(() => {
@@ -59,7 +60,10 @@ export default function GamePage() {
             if (mode === 'easy') setSpeedMode(10);
             else if (mode === 'normal') setSpeedMode(15);
             else if (mode === 'hard') setSpeedMode(20);
-            else navigate(pagesContent.home.url);
+            else if (mode === 'f' && opponent_id) {
+                setFriend(true);
+                setSpeedMode(10);
+            } else navigate(pagesContent.home.url);
         };
 
         getTheSpeedMode();
@@ -113,14 +117,26 @@ export default function GamePage() {
             };
             // ------------------------------------------ socket
             const initGame = () => {
-                socket.emit('init', {
-                    login: userInfo?.user_login,
-                    user_id: userInfo?.user_id,
-                    username: userInfo?.user_name,
-                    avatar: userInfo?.user_avatar,
-                    canvas: getCanvasSize(),
-                    speedMode: speedMode,
-                });
+                if (friend) {
+                    socket.emit('inviteToGame', {
+                        opponent_id: opponent_id,
+                        login: userInfo?.user_login,
+                        user_id: userInfo?.user_id,
+                        username: userInfo?.user_name,
+                        avatar: userInfo?.user_avatar,
+                        canvas: getCanvasSize(),
+                        speedMode: speedMode,
+                    });
+                } else {
+                    socket.emit('init', {
+                        login: userInfo?.user_login,
+                        user_id: userInfo?.user_id,
+                        username: userInfo?.user_name,
+                        avatar: userInfo?.user_avatar,
+                        canvas: getCanvasSize(),
+                        speedMode: speedMode,
+                    });
+                }
             };
             const opponentDisconnect = () => {
                 dispatch(newNotification({ type: 'Info', message: 'Player has left the game' }));
@@ -188,6 +204,7 @@ export default function GamePage() {
                 socket.off('onGame', update);
                 socket.off('matchDone', matchDone);
                 document.removeEventListener('keydown', moveKey);
+                dispatch(clearOpponent())
             };
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

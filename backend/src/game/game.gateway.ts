@@ -440,6 +440,19 @@ export class GameGateway
   getLiveMatch() {
     this.liveMatch();
   }
+
+  @SubscribeMessage('inviteToGame')
+  inviteToGame(client: Socket, payload: any) {
+    this.io.emit('acceptGame', payload);
+    this.newRoom(10, payload.canvas);
+    this.addPlayer(client, payload, this.rooms.length - 1, 0);
+  }
+
+  @SubscribeMessage('acceptInvite')
+  acceptInvite(client: Socket, payload: any) {
+    this.io.emit('playAccept', payload);
+  }
+
   @SubscribeMessage('canvas')
   canvasWidth(client: Socket, payload: any) {
     for (let i = 0; i < this.rooms.length; i++) {
