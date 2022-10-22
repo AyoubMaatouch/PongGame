@@ -2,7 +2,7 @@ import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common
 import { AuthGuard, PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Request } from 'express';
+import { Request, response } from 'express';
 
 const customExtractor = (req: Request) => {
   //THis function returns the token from the cookie and uses the return vallue to verify it
@@ -25,11 +25,16 @@ export class accessJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   // add here a bool value to check if 2fa is enabled or not
   async validate(payload: any) {
-    console.log("hnaaaa a zebi ", payload);
-    if (!payload.isAuth && payload.isEnabled)
-      throw new HttpException("Can't Authenticate", 403)
     
-    return payload;
+    // if (payload.isAuth && payload.isEnabled)
+    //     {
+    //       response.redirect(process.env.CLIENT_URL + '/2fa')
+    //     }
+    // throw new HttpException("Can't Authenticate", 403)
+    if (payload.isAuth)
+    {
+      return payload
+    }
   }
 }
 //https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/

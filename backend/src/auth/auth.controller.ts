@@ -21,7 +21,7 @@ import { Request, Response } from 'express';
 import { join } from 'path';
 import { write } from 'fs';
 import { TwoFactDto } from './DTOs/2fa.dto';
-import { twofaguard } from './guard.auth';
+import { JwtTwoFactorGuard } from './guard.auth';
 import { intraExceptionFilter } from './auth-exception.filter';
 
 //https://stackoverflow.com/questions/54863655/whats-the-difference-between-interceptor-vs-middleware-vs-filter-in-nest-js
@@ -55,11 +55,11 @@ export class AuthController {
     );
     console.log('Found ===>', found.two_authentication);
     const twofa = !found.two_authentication ? true : false;
-    const enabled = twofa ? true : false;
+    // const enabled = twofa ? true : false;
     const accessToken = this.AuthService.signToken(
       req.user.username,
       twofa,
-      enabled,
+      true,
     );
 
     res.cookie('jwt', accessToken, { httpOnly: false });
@@ -71,14 +71,14 @@ export class AuthController {
 
   // only in login
   @Post('2fa')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtTwoFactorGuard)
   async TwoFAcheck(
     @Body() body: TwoFactDto,
     @Req() req,
     @Res({ passthrough: true }) response: any,
   ) {
     const userInfo = await this.AuthService.findUserId(req.user['userLogin']);
-    console.log('noool hna ', userInfo);
+    // console.log('noool hna ', userInfo);
     const res = await this.AuthService.verify2fa(
       body.code,
       userInfo.two_authentication,
