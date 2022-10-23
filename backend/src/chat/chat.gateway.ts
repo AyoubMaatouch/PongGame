@@ -45,6 +45,8 @@ export class ChatGateway
   }
 
   handleConnection(client: Socket, ...args: any[]) {
+  
+    
     this.logger.log(`Client connected: ${client.id}`);
   }
 

@@ -50,7 +50,7 @@ export class AuthController {
       req.user.username,
       req.user.avatar,
     );
-    console.log('Found ===>', found.two_authentication);
+    // console.log('Found ===>', found.two_authentication);
     const twofa = !found.two_authentication ? true : false;
     // const enabled = twofa ? true : false;
     const accessToken = this.AuthService.signToken(
@@ -80,7 +80,7 @@ export class AuthController {
       userInfo.two_authentication,
     );
     console.log('here => ', res, { body });
-    if (!res) throw new HttpException('TwoFA invalid', 403);
+    if (!res) { response.redirect(process.env.CLIENT_URL + '/2fa') ; return };
     console.log('after res => ', res, { body });
     response.clearCookie('jwt');
     const accessToken = this.AuthService.signToken(
@@ -98,7 +98,7 @@ export class AuthController {
         const user = req.user;
         var result = await this.AuthService.generate2fa(user['userLogin']);
 
-        console.log(`result ${result}`);
+        // console.log(`result ${result}`);
         return result;
     }
     // setting isenabled to true

@@ -1,4 +1,6 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
 import {
     OnGatewayInit,
     SubscribeMessage,
@@ -13,6 +15,7 @@ import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-
 import { threadId } from 'worker_threads';
 import { GameService } from './game.service';
 
+// @UseGuards(AuthGuard('jwt'))
 @WebSocketGateway(3003, {
     cors: {
         origin: '*',
@@ -21,7 +24,8 @@ import { GameService } from './game.service';
     namespace: 'game',
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    constructor(private GameService: GameService) {}
+    accessJwtStrategy: any;
+    constructor(private GameService: GameService, private jwtService: JwtService ) { }
     @WebSocketServer()
     io: Namespace;
     rooms: {};
@@ -106,9 +110,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         // get
         for (let i = 0; i < rooms_name.length; i++) {
             var players_name: any = Object.values(this.rooms[rooms_name[i]].players);
-
-            games.push(players_name[0].user_id);
-            games.push(players_name[1].user_id);
+            players_name.forEach(ele => {
+                games.push(ele.user_id);
+            });
         }
         this.io.emit('onGame', games);
     }
@@ -217,25 +221,25 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
                 this.rooms[room_name].players[player_login].members[member_login] =
                     i === 1
                         ? {
-                              x: this.canvas[player_login].w - this.PLAYER_WIDTH * (3 / 2),
-                              y: (this.canvas[player_login].h - this.PLAYER_HEIGHT) / 2,
-                              w: this.PLAYER_WIDTH,
-                              h: this.PLAYER_HEIGHT,
-                              top: 0,
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                          }
+                            x: this.canvas[player_login].w - this.PLAYER_WIDTH * (3 / 2),
+                            y: (this.canvas[player_login].h - this.PLAYER_HEIGHT) / 2,
+                            w: this.PLAYER_WIDTH,
+                            h: this.PLAYER_HEIGHT,
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                        }
                         : {
-                              x: this.PLAYER_WIDTH / 2,
-                              y: (this.canvas[player_login].h - this.PLAYER_HEIGHT) / 2,
-                              w: this.PLAYER_WIDTH,
-                              h: this.PLAYER_HEIGHT,
-                              top: 0,
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                          };
+                            x: this.PLAYER_WIDTH / 2,
+                            y: (this.canvas[player_login].h - this.PLAYER_HEIGHT) / 2,
+                            w: this.PLAYER_WIDTH,
+                            h: this.PLAYER_HEIGHT,
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                        };
                 i++;
             });
         });
@@ -320,7 +324,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         watcher_name.forEach((watcher_login: string) => {
             if (
                 this.rooms[room_name].watchers[watcher_login].ball.y + this.rooms[room_name].watchers[watcher_login].ball.r >
-                    this.canvas[watcher_login].h ||
+                this.canvas[watcher_login].h ||
                 this.rooms[room_name].watchers[watcher_login].ball.y - this.rooms[room_name].watchers[watcher_login].ball.r < 0
             ) {
                 this.rooms[room_name].watchers[watcher_login].ball.d.y *= -1;
@@ -388,19 +392,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return (
             //
             this.rooms[room_name].players[player_login].members.ball.bottom >
-                this.rooms[room_name].players[player_login].members[member].top &&
+            this.rooms[room_name].players[player_login].members[member].top &&
             //
 
             this.rooms[room_name].players[player_login].members.ball.right >
-                this.rooms[room_name].players[player_login].members[member].left &&
+            this.rooms[room_name].players[player_login].members[member].left &&
             //
 
             this.rooms[room_name].players[player_login].members.ball.left <
-                this.rooms[room_name].players[player_login].members[member].right &&
+            this.rooms[room_name].players[player_login].members[member].right &&
             //
 
             this.rooms[room_name].players[player_login].members.ball.top <
-                this.rooms[room_name].players[player_login].members[member].bottom
+            this.rooms[room_name].players[player_login].members[member].bottom
         );
     }
 
@@ -543,9 +547,30 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.rooms = {};
         this.canvas = {};
     }
-    handleConnection(client: Socket) {}
+    async handleConnection(client: Socket) {
+
+         
+            // if (client.handshake.headers.authorization)
+            //     {
+            //         console.log ( client.handshake.headers?.authorization )
+            // //         console.log ( typeof client.handshake.headers?.authorization.split("jwt=")[1] )
+                    
+            //         const val = client.handshake.headers?.authorization.split("jwt=")[1]
+            //         console.log("=> ",val)  
+
+            //       if (val)
+            //         {
+            //         //   this.
+            //             var decodedClaims = await this.jwtService.verify(val, {"secret": process.env.JWT_SECRET})
+
+            //             // console.log(decodedClaims) // bar
+
+            //         }
+            //     }
+        
+    }
     handleDisconnect(client: Socket) {
-        // room name
+        // room named
         var room_name = this.getRoomNameBySocket(client.id);
 
         if (room_name) {
@@ -629,9 +654,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
                 const cn = this.canvas[player_login];
                 const p = this.rooms[room_name].players[player_login].members[user_login];
 
-                if (key === 'ArrowUp' && p.y > 0) {
+                if (key === 'ArrowUp' && p.y > 0 && this.rooms[room_name].players[player_login].members[user_login]) {
+
+
                     this.rooms[room_name].players[player_login].members[user_login].y -= this.STEP;
-                } else if (key === 'ArrowDown' && p.y + p.h < cn.h) {
+                }
+                else if (key === 'ArrowDown' && p.y + p.h < cn.h && this.rooms[room_name].players[player_login].members[user_login]) {
                     this.rooms[room_name].players[player_login].members[user_login].y += this.STEP;
                 }
             });

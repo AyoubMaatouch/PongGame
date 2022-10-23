@@ -48,7 +48,14 @@ export default function GamePage() {
     // useEffect
     React.useEffect(() => {
         // socket
-        const socket = io(`${SOCKET}/game`);
+        const socket = io(`${SOCKET}/game`, 
+        {
+
+            extraHeaders: {
+                Authorization: document.cookie,
+            }
+        }
+        );
         // canvas
         const canvasTag = canvasRef?.current;
         const canvasContext = canvasRef?.current?.getContext('2d');
