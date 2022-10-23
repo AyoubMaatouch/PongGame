@@ -45,7 +45,7 @@ const HomePage = () => {
     // CONTEXT
     const { data, dispatch } = React.useContext<any>(GlobalContext);
     // state
-    const { liveMatch, userInfo } = data;
+    const { liveMatch } = data;
     const [sliderValue, setSliderValue] = React.useState(10);
     // modal
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -62,8 +62,6 @@ const HomePage = () => {
                 }
             })
             .catch((error) => {
-                console.log("error", error);
-                
                 navigate(pagesContent.login.url);
             });
         // socket

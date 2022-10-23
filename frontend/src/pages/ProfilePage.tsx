@@ -10,7 +10,7 @@ import {
     Stack,
     useBreakpointValue,
     useMediaQuery,
-    useTheme
+    useTheme,
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -82,6 +82,7 @@ const ProfilePage = () => {
         getUserInfo(dispatch)
             .then((info: any) => {
                 if (params?.user_id === 'me') {
+                    getMatchHistory(dispatch, info.user_id);
                     setMe(params?.user_id === 'me');
                     setUpdated(info?.updated);
                     if (!info?.updated) {
@@ -92,7 +93,8 @@ const ProfilePage = () => {
                     }
                 } else {
                     getFriendInfo(dispatch, params?.user_id)
-                        .then(() => {
+                        .then((info: any) => {
+                            getMatchHistory(dispatch, info.user_id);
                             setMe(params?.user_id === 'me');
                         })
                         .catch(() => {
@@ -104,16 +106,12 @@ const ProfilePage = () => {
                 navigate(pagesContent.login.url);
             });
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [params?.user_id]);
-
-    React.useEffect(() => {
-        if (userInfo) getMatchHistory(dispatch, userInfo.user_id);
         return () => {
             dispatch(clearMatchHistory());
-        }
+        };
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userInfo]);
+    }, [params?.user_id]);
 
     React.useEffect(() => {
         if (matchHistory && userInfo) {
@@ -134,11 +132,11 @@ const ProfilePage = () => {
             if (wins_row >= 2) setTwo(true);
             if (wins_row >= 5) setThree(true);
         }
-        return (() => {
+        return () => {
             setTwo(false);
             setThree(false);
             setOne(false);
-        })
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchHistory, userInfo]);
 
@@ -200,9 +198,7 @@ const ProfilePage = () => {
                                         />
                                     </ChakraLink>
                                 </HStack>
-                                {me && (
-                                    <TwofacAuth />
-                                )}
+                                {me && <TwofacAuth />}
 
                                 <Line maxW="10rem" />
                                 <Spacer />

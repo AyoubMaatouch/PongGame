@@ -30,7 +30,7 @@ export default function SignInPage() {
 
     return (
         <>
-            <Flex mb={5} px={10} justifyContent={'right'} alignItems={'center'} overflow={'hideen'}>
+            <Flex mb={5} px={10} justifyContent={'right'} alignItems={'center'} overflow={'hidden'}>
                 <Spacer />
                 <ToggleMode />
             </Flex>

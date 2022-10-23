@@ -1,13 +1,14 @@
 import { Avatar, Badge, Box, Grid, GridItem, HStack, Icon, Text, useMediaQuery, useTheme, VStack } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
 import React from 'react';
 import { IoEye } from 'react-icons/io5';
 import { useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { pagesContent, SOCKET } from '../constants';
 import { usePageTitle } from '../hooks/usePageTitle';
+import useWindowWidth from '../hooks/useWidth';
 import { newNotification } from '../State/Action';
 import { getUserInfo } from '../State/Api';
-// import GameContextProvider from '../State/GameProvider';
 import { GlobalContext } from '../State/Provider';
 
 export default function LiveMatchPage() {
@@ -31,13 +32,15 @@ export default function LiveMatchPage() {
         login: '',
         score: 0,
     });
-    const [canvasNewWidth, setNewCanvasWidth] = React.useState(0);
+    const [canvasWidth, setCanvasWidth] = React.useState(800);
     const [watcher, setWatcher] = React.useState(0);
     // canvas
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
+    const containerRef = React.useRef<HTMLDivElement>(null);
     // context
     const { data, dispatch } = React.useContext<any>(GlobalContext);
     const { userInfo } = data;
+    const width = useWindowWidth();
 
     // useEffect
     React.useEffect(() => {
@@ -104,6 +107,10 @@ export default function LiveMatchPage() {
                 dispatch(newNotification({ type: 'Error', message: 'Room not found' }));
                 navigate(pagesContent.home.url);
             };
+            const notAllowed = () => {
+                dispatch(newNotification({ type: 'Error', message: 'You are not allowed' }));
+                navigate(pagesContent.home.url);
+            };
             // ------------------------------------------ game
             // render the frame
             const render = (ball: any, user: any, opponent: any) => {
@@ -112,41 +119,87 @@ export default function LiveMatchPage() {
                 drawPlayer(user.x, user.y, user.w, user.h);
                 drawPlayer(opponent.x, opponent.y, opponent.w, opponent.h);
             };
-            const update = (data: any) => {
-                setWatcher(data.watcher.length);
-                render(data.ball, data.players[0].movement, data.players[1].movement);
+            const game = (data: any) => {
+                const userData: any = Object.values(data.watchers[userInfo?.user_login]);
+                const watchers: any = Object.keys(data.watchers);
+                const infoData: any = Object.values(data.players);
+
+                console.log('userData', userData);
+
+                setWatcher(watchers.length);
+                render(userData[0], userData[1], userData[2]);
                 setOpponent({
-                    username: data.players[1].username,
-                    avatar: data.players[1].avatar,
-                    login: data.players[1].login,
-                    score: data.players[1].score,
+                    username: infoData[1].user_name,
+                    avatar: infoData[1].user_avatar,
+                    login: infoData[1].user_login,
+                    score: infoData[1].score,
                 });
                 setUser({
-                    username: data.players[0].username,
-                    avatar: data.players[0].avatar,
-                    login: data.players[0].login,
-                    score: data.players[0].score,
+                    username: infoData[0].user_name,
+                    avatar: infoData[0].user_avatar,
+                    login: infoData[0].user_login,
+                    score: infoData[0].score,
                 });
-                setNewCanvasWidth(data.canvas.w);
+                // setNewCanvasWidth(data.canvas.w);
             };
             socket.emit('watcher', {
                 room_name: params?.room_name,
+                user_login: userInfo?.user_login,
+                canvas: getCanvasSize(),
             });
             // ------------------------------------------ game loop
             // on game
             socket.on('opponentDisconnect', opponentDisconnect);
-            socket.on('onGame', update);
+            socket.on('game', game);
             socket.on('roomNotfound', notFound);
+            socket.on('notAllowed', notAllowed);
 
             return () => {
                 socket.disconnect();
                 socket.off('opponentDisconnect', opponentDisconnect);
-                socket.off('onWatch', update);
+                socket.off('game', game);
                 socket.off('roomNotfound', notFound);
+                socket.off('notAllowed', notAllowed);
             };
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo, params?.room_name]);
+
+    React.useEffect(() => {
+        // socket
+        const socket = io(`${SOCKET}/game`);
+        //
+        const containerTag = containerRef?.current;
+        // canvas
+        const canvasTag = canvasRef?.current;
+        // get the canvas coordinate
+        const getCanvasSize = () => {
+            let w = 0;
+            let h = 0;
+            if (canvasTag) {
+                w = canvasTag.width;
+                h = canvasTag.height;
+            }
+            return {
+                w,
+                h,
+            };
+        };
+
+        if (containerTag) {
+            if (containerTag.offsetWidth > 800) {
+                setCanvasWidth(800);
+            } else {
+                setCanvasWidth(containerTag.offsetWidth);
+            }
+        }
+        if (userInfo)
+            socket.emit('newCanvas', {
+                canvas: getCanvasSize(),
+                user_login: userInfo?.user_login,
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [containerRef, width]);
 
     return (
         <>
@@ -171,8 +224,8 @@ export default function LiveMatchPage() {
                         </HStack>
                     </GridItem>
                 </Grid>
-                <Box w="100%" flexDirection="column" display="flex" alignItems="center" justifyContent="center">
-                    <canvas width={canvasNewWidth} height="400" ref={canvasRef}></canvas>
+                <Box w="100%" ref={containerRef} flexDirection="column" display="flex" alignItems="center" justifyContent="center">
+                    <motion.canvas width={canvasWidth} height="400" ref={canvasRef} />
                 </Box>
                 <Badge mt={5} borderRadius="full" fontSize="3xl" px={3}>
                     <HStack alignItems="center" spacing={3}>

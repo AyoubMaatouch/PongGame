@@ -1,14 +1,14 @@
-import { useMediaQuery, VStack, Grid, GridItem, HStack, Avatar, useTheme, Text, Box, Flex, Spinner, Badge, Icon } from '@chakra-ui/react';
+import { Avatar, Badge, Box, Flex, Grid, GridItem, HStack, Icon, Spinner, Text, useMediaQuery, useTheme, VStack } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
 import React from 'react';
 import { IoEye } from 'react-icons/io5';
-import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { pagesContent, SOCKET } from '../constants';
 import { usePageTitle } from '../hooks/usePageTitle';
 import useWindowWidth from '../hooks/useWidth';
 import { clearOpponent, newNotification } from '../State/Action';
 import { getUserInfo } from '../State/Api';
-// import GameContextProvider from '../State/GameProvider';
 import { GlobalContext } from '../State/Provider';
 
 export default function GamePage() {
@@ -23,7 +23,6 @@ export default function GamePage() {
     const [speedMode, setSpeedMode] = React.useState(0);
     const [watcher, setWatcher] = React.useState(0);
     const [canvasWidth, setCanvasWidth] = React.useState(800);
-    const [canvasNewWidth, setNewCanvasWidth] = React.useState(0);
     const [play, setPlay] = React.useState(false);
     const [friend, setFriend] = React.useState(false);
     const [user, setUser] = React.useState({
@@ -57,12 +56,12 @@ export default function GamePage() {
         // ge the speeed
         const getTheSpeedMode = () => {
             const mode = params.speed_mode?.toLowerCase();
-            if (mode === 'easy') setSpeedMode(10);
-            else if (mode === 'normal') setSpeedMode(15);
-            else if (mode === 'hard') setSpeedMode(20);
+            if (mode === 'easy') setSpeedMode(20);
+            else if (mode === 'normal') setSpeedMode(22);
+            else if (mode === 'hard') setSpeedMode(25);
             else if (mode === 'f' && opponent_id) {
                 setFriend(true);
-                setSpeedMode(10);
+                setSpeedMode(20);
             } else navigate(pagesContent.home.url);
         };
 
@@ -118,23 +117,23 @@ export default function GamePage() {
             // ------------------------------------------ socket
             const initGame = () => {
                 if (friend) {
-                    socket.emit('inviteToGame', {
-                        opponent_id: opponent_id,
-                        login: userInfo?.user_login,
-                        user_id: userInfo?.user_id,
-                        username: userInfo?.user_name,
-                        avatar: userInfo?.user_avatar,
-                        canvas: getCanvasSize(),
-                        speedMode: speedMode,
-                    });
+                    // socket.emit('inviteToGame', {
+                    //     opponent_id: opponent_id,
+                    //     login: userInfo?.user_login,
+                    //     user_id: userInfo?.user_id,
+                    //     username: userInfo?.user_name,
+                    //     avatar: userInfo?.user_avatar,
+                    //     canvas: getCanvasSize(),
+                    //     speedMode: speedMode,
+                    // });
                 } else {
-                    socket.emit('init', {
-                        login: userInfo?.user_login,
+                    socket.emit('initGame', {
+                        user_login: userInfo?.user_login,
                         user_id: userInfo?.user_id,
-                        username: userInfo?.user_name,
-                        avatar: userInfo?.user_avatar,
+                        user_name: userInfo?.user_name,
+                        user_avatar: userInfo?.user_avatar,
+                        speed_mode: speedMode,
                         canvas: getCanvasSize(),
-                        speedMode: speedMode,
                     });
                 }
             };
@@ -142,16 +141,22 @@ export default function GamePage() {
                 dispatch(newNotification({ type: 'Info', message: 'Player has left the game' }));
                 navigate(pagesContent.home.url);
             };
-            const matchDone = (data: any) => {
-                if (data.players[0].login === userInfo?.user_login) {
-                    if (data.players[0].score > data.players[1].score)
+            const gameEnded = (data: any) => {
+                const infoData: any = Object.values(data.players);
+
+                if (infoData[0].user_login === userInfo?.user_login) {
+                    if (infoData[0].score > infoData[1].score)
                         dispatch(newNotification({ type: 'Success', message: '🎉🎉 Congratulation !! you have won the game 🎉🎉' }));
                     else dispatch(newNotification({ type: 'Info', message: '🤷🤷 You have lost the game... Try again 💪💪' }));
-                } else if (data.players[1].login === userInfo?.user_login) {
-                    if (data.players[1].score > data.players[0].score)
+                } else if (infoData[1].user_login === userInfo?.user_login) {
+                    if (infoData[1].score > infoData[0].score)
                         dispatch(newNotification({ type: 'Success', message: '🎉🎉 Congratulation !! you have won the game 🎉🎉' }));
                     else dispatch(newNotification({ type: 'Info', message: '🤷🤷 You have lost the game... Try again 💪💪' }));
                 }
+                navigate(pagesContent.home.url);
+            };
+            const notAllowed = () => {
+                dispatch(newNotification({ type: 'Error', message: 'You are not allowed' }));
                 navigate(pagesContent.home.url);
             };
             // ------------------------------------------ game
@@ -162,29 +167,32 @@ export default function GamePage() {
                 drawPlayer(user.x, user.y, user.w, user.h);
                 drawPlayer(opponent.x, opponent.y, opponent.w, opponent.h);
             };
-            const update = (data: any) => {
-                render(data.ball, data.players[0].movement, data.players[1].movement);
-                setWatcher(data.watcher.length);
+            const game = (data: any) => {
+                const userData: any = Object.values(data.players[userInfo?.user_login].members);
+                const infoData: any = Object.values(data.players);
+                const watchers: any = Object.keys(data.watchers);
+
+                render(userData[0], userData[1], userData[2]);
+                setWatcher(watchers.length);
                 setPlay(true);
                 setOpponent({
-                    username: data.players[1].username,
-                    avatar: data.players[1].avatar,
-                    login: data.players[1].login,
-                    score: data.players[1].score,
+                    username: infoData[1].user_name,
+                    avatar: infoData[1].user_avatar,
+                    login: infoData[1].user_login,
+                    score: infoData[1].score,
                 });
                 setUser({
-                    username: data.players[0].username,
-                    avatar: data.players[0].avatar,
-                    login: data.players[0].login,
-                    score: data.players[0].score,
+                    username: infoData[0].user_name,
+                    avatar: infoData[0].user_avatar,
+                    login: infoData[0].user_login,
+                    score: infoData[0].score,
                 });
-                setNewCanvasWidth(data.canvas.w);
             };
             const moveKey = (event: KeyboardEvent) => {
                 if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
                     socket.emit('moveKey', {
                         key: event.key,
-                        canvas: getCanvasSize(),
+                        user_login: userInfo?.user_login,
                     });
                 }
             };
@@ -193,26 +201,47 @@ export default function GamePage() {
             initGame();
             // on game
             socket.on('opponentDisconnect', opponentDisconnect);
-            socket.on('matchDone', matchDone);
-            socket.on('onGame', update);
+            socket.on('gameEnded', gameEnded);
+            socket.on('game', game);
+            socket.on('notAllowed', notAllowed);
+
             // move
             document.addEventListener('keydown', moveKey);
 
             return () => {
                 socket.disconnect();
                 socket.off('opponentDisconnect', opponentDisconnect);
-                socket.off('onGame', update);
-                socket.off('matchDone', matchDone);
+                socket.off('game', game);
+                socket.off('gameEnded', gameEnded);
+                socket.off('notAllowed', notAllowed);
                 document.removeEventListener('keydown', moveKey);
-                dispatch(clearOpponent())
+                dispatch(clearOpponent());
             };
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo, speedMode]);
 
     React.useEffect(() => {
+        // socket
+        const socket = io(`${SOCKET}/game`);
         //
         const containerTag = containerRef?.current;
+        // canvas
+        const canvasTag = canvasRef?.current;
+        // get the canvas coordinate
+        const getCanvasSize = () => {
+            let w = 0;
+            let h = 0;
+            if (canvasTag) {
+                w = canvasTag.width;
+                h = canvasTag.height;
+            }
+            return {
+                w,
+                h,
+            };
+        };
+
         if (containerTag) {
             if (containerTag.offsetWidth > 800) {
                 setCanvasWidth(800);
@@ -220,7 +249,11 @@ export default function GamePage() {
                 setCanvasWidth(containerTag.offsetWidth);
             }
         }
-        //
+        if (userInfo)
+            socket.emit('newCanvas', {
+                canvas: getCanvasSize(),
+                user_login: userInfo?.user_login,
+            });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [containerRef, width]);
     return (
@@ -252,7 +285,7 @@ export default function GamePage() {
                             <Spinner></Spinner>
                         </Flex>
                     )}
-                    <canvas width={canvasNewWidth === 0 ? canvasWidth : canvasNewWidth} height="400" ref={canvasRef}></canvas>
+                    <motion.canvas width={canvasWidth} height="400" ref={canvasRef} />
                 </Box>
                 {play && (
                     <Badge mt={5} borderRadius="full" fontSize="3xl" px={3}>

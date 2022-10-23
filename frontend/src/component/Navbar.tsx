@@ -71,6 +71,8 @@ export default function Navbar() {
         const socket = io(`${SOCKET}/game`);
 
         socket.on('acceptGame', (data: any) => {
+            console.log(data);
+            
             if (user_id === data.opponent_id) {
                 setInviteData(data);
                 setInvite(true);
@@ -83,8 +85,8 @@ export default function Navbar() {
         <Stack spacing={5} h="100%">
             {invite && (
                 <GameInvite
-                    name={inviteData?.user_name}
-                    avatar={inviteData?.user_avatar}
+                    name={inviteData?.username}
+                    avatar={inviteData?.avatar}
                     user_id={inviteData?.user_id}
                     opponent_id={inviteData?.opponent_id}
                 />
