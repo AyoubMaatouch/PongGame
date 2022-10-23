@@ -7,7 +7,7 @@ import { io } from 'socket.io-client';
 import { pagesContent, SOCKET } from '../constants';
 import { usePageTitle } from '../hooks/usePageTitle';
 import useWindowWidth from '../hooks/useWidth';
-import { clearOpponent, newNotification } from '../State/Action';
+import { clearGameWithFriend, clearOpponent, newNotification } from '../State/Action';
 import { getUserInfo } from '../State/Api';
 import { GlobalContext } from '../State/Provider';
 
@@ -43,7 +43,7 @@ export default function GamePage() {
     const containerRef = React.useRef<HTMLDivElement>(null);
     // context
     const { data, dispatch } = React.useContext<any>(GlobalContext);
-    const { userInfo, opponent_id } = data;
+    const { userInfo, opponent_id, playing_with_friend } = data;
 
     // useEffect
     React.useEffect(() => {
@@ -59,8 +59,8 @@ export default function GamePage() {
             if (mode === 'easy') setSpeedMode(20);
             else if (mode === 'normal') setSpeedMode(22);
             else if (mode === 'hard') setSpeedMode(25);
-            else if (mode === 'f' && opponent_id) {
-                setFriend(true);
+            else if (mode === 'f' && (opponent_id || playing_with_friend)) {
+                if (!playing_with_friend) setFriend(true);
                 setSpeedMode(20);
             } else navigate(pagesContent.home.url);
         };
@@ -117,15 +117,26 @@ export default function GamePage() {
             // ------------------------------------------ socket
             const initGame = () => {
                 if (friend) {
-                    // socket.emit('inviteToGame', {
-                    //     opponent_id: opponent_id,
-                    //     login: userInfo?.user_login,
-                    //     user_id: userInfo?.user_id,
-                    //     username: userInfo?.user_name,
-                    //     avatar: userInfo?.user_avatar,
-                    //     canvas: getCanvasSize(),
-                    //     speedMode: speedMode,
-                    // });
+                    socket.emit('inviteToGame', {
+                        opponent_id: opponent_id,
+                        user_login: userInfo?.user_login,
+                        user_id: userInfo?.user_id,
+                        user_name: userInfo?.user_name,
+                        user_avatar: userInfo?.user_avatar,
+                        speed_mode: speedMode,
+                        canvas: getCanvasSize(),
+                    });
+                } else if (playing_with_friend) {
+                    socket.emit('gameWithFriend', {
+                        opponent_id: opponent_id,
+                        user_login: userInfo?.user_login,
+                        user_id: userInfo?.user_id,
+                        user_name: userInfo?.user_name,
+                        user_avatar: userInfo?.user_avatar,
+                        speed_mode: speedMode,
+                        canvas: getCanvasSize(),
+                        room_name: playing_with_friend,
+                    });
                 } else {
                     socket.emit('initGame', {
                         user_login: userInfo?.user_login,
@@ -157,6 +168,10 @@ export default function GamePage() {
             };
             const notAllowed = () => {
                 dispatch(newNotification({ type: 'Error', message: 'You are not allowed' }));
+                navigate(pagesContent.home.url);
+            };
+            const cancelGame = () => {
+                dispatch(newNotification({ type: 'Info', message: 'Invitation has been canceled' }));
                 navigate(pagesContent.home.url);
             };
             // ------------------------------------------ game
@@ -204,6 +219,7 @@ export default function GamePage() {
             socket.on('gameEnded', gameEnded);
             socket.on('game', game);
             socket.on('notAllowed', notAllowed);
+            socket.on('cancelGame', cancelGame);
 
             // move
             document.addEventListener('keydown', moveKey);
@@ -214,8 +230,10 @@ export default function GamePage() {
                 socket.off('game', game);
                 socket.off('gameEnded', gameEnded);
                 socket.off('notAllowed', notAllowed);
+                socket.off('cancelGame', cancelGame);
                 document.removeEventListener('keydown', moveKey);
                 dispatch(clearOpponent());
+                dispatch(clearGameWithFriend());
             };
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -23,7 +23,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { pagesContent, SOCKET, SOCKET_STATUS, tabs } from '../constants';
 import { io } from 'socket.io-client';
 import { GlobalContext } from '../State/Provider';
-import { setOnlineUsers } from '../State/Action';
+import { setOnGameUsers, setOnlineUsers } from '../State/Action';
 import GameInvite from './GameInvite';
 
 export default function Navbar() {
@@ -52,15 +52,15 @@ export default function Navbar() {
             },
         });
         if (user_id) {
-            const updatenline = (users: any) => {
+            const updateOnGame = (users: any) => {
                 dispatch(setOnlineUsers(users));
             };
 
-            socket.on('online', updatenline);
-            socket.emit('onlinePing', updatenline);
+            socket.on('online', updateOnGame);
+            socket.emit('onlinePing', updateOnGame);
 
             return () => {
-                socket.off('online', updatenline);
+                socket.off('online', updateOnGame);
                 socket.disconnect();
             };
         }
@@ -71,13 +71,23 @@ export default function Navbar() {
         const socket = io(`${SOCKET}/game`);
 
         socket.on('acceptGame', (data: any) => {
-            console.log(data);
-            
             if (user_id === data.opponent_id) {
                 setInviteData(data);
                 setInvite(true);
             }
         });
+
+        const updatenline = (users: any) => {
+            dispatch(setOnGameUsers(users));
+        };
+
+        socket.on('onGame', updatenline);
+        socket.emit('getOnGame', updatenline);
+
+        return () => {
+            socket.off('onGame', updatenline);
+            socket.disconnect();
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user_id]);
 
@@ -85,10 +95,12 @@ export default function Navbar() {
         <Stack spacing={5} h="100%">
             {invite && (
                 <GameInvite
-                    name={inviteData?.username}
-                    avatar={inviteData?.avatar}
+                    name={inviteData?.user_name}
+                    avatar={inviteData?.user_avatar}
                     user_id={inviteData?.user_id}
                     opponent_id={inviteData?.opponent_id}
+                    room_name={inviteData?.room_name}
+                    setInvite={setInvite}
                 />
             )}
             <Flex mb={5} px={10} justifyContent={'right'} alignItems={'center'} overflow={'hideen'}>

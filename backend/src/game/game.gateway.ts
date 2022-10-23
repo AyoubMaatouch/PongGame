@@ -98,6 +98,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     // create a new player
+    onGame() {
+        // data
+        var games = [];
+        var rooms_name = Object.keys(this.rooms);
+
+        // get
+        for (let i = 0; i < rooms_name.length; i++) {
+            var players_name: any = Object.values(this.rooms[rooms_name[i]].players);
+
+            games.push(players_name[0].user_id);
+            games.push(players_name[1].user_id);
+        }
+        this.io.emit('onGame', games);
+    }
+
+    // create a new player
     newPlayer(user_id: string, user_login: string, user_name: string, user_avatar: string, socket_id: string) {
         return {
             user_id: user_id,
@@ -268,7 +284,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     // check the score
     checkScore(room_name: string, players_name1: string, players_name2: string) {
-        if (this.rooms[room_name].players[players_name1].score === 5 || this.rooms[room_name].players[players_name2].score === 5) {
+        if (this.rooms[room_name].players[players_name1].score === 5000 || this.rooms[room_name].players[players_name2].score === 5000) {
             // clear the interval
             clearInterval(this.rooms[room_name].intervalID);
 
@@ -424,7 +440,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     updatePlayer(room_name: string) {
         Object.keys(this.rooms[room_name].players).forEach((player_name: string) => {
             console.log(this.rooms[room_name].players[player_name].members);
-            
+
             const member = Object.keys(this.rooms[room_name].players[player_name].members);
             this.rooms[room_name].players[player_name].members[member[1]].x = 0;
             this.rooms[room_name].players[player_name].members[member[2]].x = this.canvas[player_name].w - this.PLAYER_WIDTH * (3 / 2);
@@ -545,6 +561,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             // delete from obj
             delete this.rooms[room_name];
 
+            this.onGame();
+            this.liveMatch();
+
             return;
         }
         // room name
@@ -592,6 +611,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             this.liveMatch();
             this.play(room_name);
         }
+        this.onGame();
     }
 
     // move players
@@ -634,6 +654,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage('getLiveMatch')
     getLiveMatch() {
         this.liveMatch();
+    }
+
+    // get all live matchs
+    @SubscribeMessage('getOnGame')
+    getOnGame() {
+        this.onGame();
     }
 
     // start watching
@@ -702,6 +728,79 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.canvas[user_login] = canvas;
     }
 
+    // ------------------------------
+
+    @SubscribeMessage('inviteToGame')
+    inviteToGame(client: Socket, payload: any) {
+        const { opponent_id, speed_mode, user_login, user_id, user_name, user_avatar, canvas } = payload;
+
+        if (this.roomProtection(user_login)) {
+            client.emit('notAllowed');
+            return;
+        }
+
+        const room_name = this.newRoom(speed_mode);
+
+        this.rooms[room_name].isRandom = false;
+        this.rooms[room_name].player_guest = opponent_id;
+
+        // join room
+        client.join(room_name);
+
+        // add player
+        this.canvas[user_login] = canvas;
+        this.rooms[room_name].players[user_login] = this.newPlayer(user_id, user_login, user_name, user_avatar, client.id);
+
+        this.io.emit('acceptGame', { ...payload, room_name });
+        this.onGame();
+    }
+
+    @SubscribeMessage('gameWithFriend')
+    gameWithFriend(client: Socket, payload: any) {
+        const { room_name, user_login, user_id, user_name, user_avatar, canvas } = payload;
+
+        // join room
+        if (this.rooms[room_name]) {
+            client.join(room_name);
+
+            // add player
+            this.canvas[user_login] = canvas;
+
+            this.rooms[room_name].players[user_login] = this.newPlayer(user_id, user_login, user_name, user_avatar, client.id);
+
+            // room_is_full
+            if (Object.keys(this.rooms[room_name].players).length == 2) {
+                this.rooms[room_name].isFull = true;
+                this.initMembers(room_name);
+                this.initBall(room_name);
+                this.liveMatch();
+                this.play(room_name);
+            }
+            this.onGame();
+        }
+        else {
+            client.emit('cancelGame');
+        }
+    }
+
+    @SubscribeMessage('canceInvite')
+    canceInvite(client: Socket, payload: any) {
+        const { room_name } = payload;
+        // clear the game
+        clearInterval(this.rooms[room_name].intervalID);
+
+        // emit game finished
+        this.io.to(room_name).emit('cancelGame');
+
+        // clear the soocket room
+        this.io.socketsLeave(room_name);
+
+        // delete from obj
+        delete this.rooms[room_name];
+
+        this.onGame();
+        this.liveMatch();
+    }
     //   util func
     //   isRoomFull(room_name: string) {
     //     return (
@@ -1085,13 +1184,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     //   @SubscribeMessage('getLiveMatch')
     //   getLiveMatch() {
     //     this.liveMatch();
-    //   }
-
-    //   @SubscribeMessage('inviteToGame')
-    //   inviteToGame(client: Socket, payload: any) {
-    //     this.io.emit('acceptGame', payload);
-    //     this.newRoom(10, payload.canvas);
-    //     this.addPlayer(client, payload, this.rooms.length - 1, 0);
     //   }
 
     //   @SubscribeMessage('acceptInvite')

@@ -1,25 +1,37 @@
 import React from 'react';
 import { Avatar, Button, Stack, useDisclosure, Text, Box, HStack } from '@chakra-ui/react';
+import { pagesContent, SOCKET } from '../constants';
+import { GlobalContext } from '../State/Provider';
+import { useNavigate } from 'react-router-dom';
+import { gameWithFriend } from '../State/Action';
 import { io } from 'socket.io-client';
-import { SOCKET } from '../constants';
 // TYPE
 type Props = {
     name: string;
     avatar: string;
     user_id: string;
     opponent_id: string;
+    room_name: string;
+    setInvite: (va: boolean) => void;
 };
 
-const GameInvite = ({ name, avatar, user_id, opponent_id }: Props) => {
-    const { onClose } = useDisclosure();
-    const socket = io(`${SOCKET}/game`);
+const GameInvite = ({ setInvite, name, avatar, room_name, opponent_id }: Props) => {
+    const navigate = useNavigate();
+    const { dispatch } = React.useContext<any>(GlobalContext);
 
     const handleAccept = () => {
-        socket.emit('acceptInvite', {
-            opponent_id,
-            user_id,
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        dispatch(gameWithFriend(room_name));
+        setInvite(false);
+        navigate(`${pagesContent.play.url}/f`);
+    };
+
+    const handleCancel = () => {
+        const socket = io(`${SOCKET}/game`);
+
+        socket.emit('canceInvite', {
+            room_name
+        })
+        setInvite(false);
     };
 
     return (
@@ -31,14 +43,14 @@ const GameInvite = ({ name, avatar, user_id, opponent_id }: Props) => {
                         {name}
                     </Text>
                 </Stack>
-                <Text fontWeight="bold" fontSize="xl" textAlign='center' mb={5}>
+                <Text fontWeight="bold" fontSize="xl" textAlign="center" mb={5}>
                     Invite you to play
                 </Text>
                 <HStack alignItems="center">
                     <Button variant={'ghost'} colorScheme="purple" mr={3} onClick={handleAccept}>
                         ACCEPT
                     </Button>
-                    <Button variant={'ghost'} color="customRed" mr={3} onClick={onClose}>
+                    <Button variant={'ghost'} color="customRed" mr={3} onClick={handleCancel}>
                         CANCEL
                     </Button>
                 </HStack>

@@ -1,8 +1,10 @@
 import React, { useContext, useEffect } from 'react';
-import { Avatar, HStack, Spacer, Text, VStack } from '@chakra-ui/react';
+import { Avatar, AvatarBadge, HStack, Icon, Spacer, Text, VStack } from '@chakra-ui/react';
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { GlobalContext } from '../State/Provider';
 import { ChatContext } from '../State/ChatProvider';
+import { motion } from 'framer-motion';
+import { RiPingPongFill } from 'react-icons/ri';
 
 type Props = {
     avatarName: string;
@@ -16,12 +18,20 @@ type Props = {
 
 function ChatHeader({ avatarName, avatarSrc, chatName, isGroup, onClickCallBack, backArrowCallBack, menu }: Props) {
     const { data } = React.useContext<any>(GlobalContext);
-    const { online } = data;
+    const { online, on_game } = data;
     const { selectedChat } = useContext<any>(ChatContext);
     const isOnline = (user_id: string) => {
         for (let i = 0; i < online.length; i++) {
             const user = online[i];
             if (user.user_id.toString() === user_id.toString()) return true;
+        }
+        return false;
+    };
+
+    const isOnGame = (user_id: string) => {
+        for (let i = 0; i < on_game.length; i++) {
+            const user = on_game[i];
+            if (user && user.toString() === user_id.toString()) return true;
         }
         return false;
     };
@@ -40,11 +50,16 @@ function ChatHeader({ avatarName, avatarSrc, chatName, isGroup, onClickCallBack,
                 <Avatar name={avatarName} src={avatarSrc}></Avatar>
                 <VStack spacing={0} alignItems="left">
                     <Text>{chatName.length > 10 ? chatName.slice(0, 10) + '...' : chatName}</Text>
-                    {selectedChat.chat === 'F' && (
-                        <Text fontWeight={'lighter'} fontSize={'xs'} color={isOnline(selectedChat.id) ? 'green' : 'red'}>
-                            {isOnline(selectedChat.id) ? 'Online' : 'Offline'}
-                        </Text>
-                    )}
+                    {selectedChat.chat === 'F' &&
+                        (isOnGame(selectedChat.id) ? (
+                            <Text fontWeight={'lighter'} fontSize={'xs'} color="blue.500">
+                                on game 🏓
+                            </Text>
+                        ) : (
+                            <Text fontWeight={'lighter'} fontSize={'xs'} color={isOnline(selectedChat.id) ? 'green' : 'red'}>
+                                {isOnline(selectedChat.id) ? 'Online' : 'Offline'}
+                            </Text>
+                        ))}
                 </VStack>
             </HStack>
             <Spacer />

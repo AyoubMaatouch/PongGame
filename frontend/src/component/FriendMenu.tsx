@@ -45,7 +45,7 @@ const FriendMenu = () => {
     const navigate = useNavigate();
     const { data } = React.useContext<any>(GlobalContext);
     const globalDispatch = useContext<any>(GlobalContext).dispatch;
-    const { userInfo, online } = data;
+    const { userInfo, online, on_game } = data;
 
     const blockUserHandler = () => {
         const payload = {
@@ -74,9 +74,17 @@ const FriendMenu = () => {
         return false;
     };
 
+    const isOnGame = (user_id: string) => {
+        for (let i = 0; i < on_game.length; i++) {
+            const user = on_game[i];
+            if (user && user.toString() === user_id.toString()) return true;
+        }
+        return false;
+    };
+
     const inviteToGameHandler = () => {
-        globalDispatch(setOpponentId(selectedChat.id))
-        navigate(`${pagesContent.play.url}/f`)
+        globalDispatch(setOpponentId(selectedChat.id));
+        navigate(`${pagesContent.play.url}/f`);
     };
 
     const viewProfileHandler = () => {
@@ -89,7 +97,7 @@ const FriendMenu = () => {
             <Menu>
                 <MenuButton as={IconButton} icon={<BsThreeDotsVertical />} variant="ghost" />
                 <MenuList>
-                    {isOnline(selectedChat.id) && (
+                    {!isOnGame(selectedChat.id) && isOnline(selectedChat.id) && (
                         <MenuItem icon={<RiPingPongFill size={20} color={'yellow'} />} onClick={inviteToGameHandler}>
                             <Text> Invite To Game</Text>
                         </MenuItem>

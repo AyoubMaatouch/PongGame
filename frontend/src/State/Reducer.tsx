@@ -22,10 +22,13 @@ export const GlobalReducer = (state: any, action: any) => {
             newState.loader = false;
             newState.notification = null;
             newState.userInfo = null;
-            newState.matchHistory = null;
+            newState.matchHistory = [];
             newState.liveMatch = [];
             newState.online = [];
+            newState.on_game = [];
             newState.user_id = null;
+            newState.opponent_id = null;
+            newState.playing_with_friend = null;
             break;
         case 'RESET_ALERT':
             newState.notification = null;
@@ -45,6 +48,9 @@ export const GlobalReducer = (state: any, action: any) => {
         case 'ONLINE_USERS':
             newState.online = payload;
             break;
+        case 'ON_GAME_USERS':
+            newState.on_game = payload;
+            break;
         case 'USER_ID':
             newState.user_id = payload;
             break;
@@ -63,7 +69,12 @@ export const GlobalReducer = (state: any, action: any) => {
         case 'CLEAR_TWO_FAC_QRCODE':
             newState.userInfo.two_authentication = null;
             break;
-
+        case 'IM_PLAYING_WITH_FRIEND':
+            newState.playing_with_friend = payload;
+            break;
+        case 'CLEAR_IM_PLAYING_WITH_FRIEND':
+            newState.playing_with_friend = null;
+            break;
         default:
             break;
     }

@@ -63,7 +63,7 @@ const ProfilePage = () => {
     // context
     const { data, dispatch } = React.useContext<any>(GlobalContext);
     // ex
-    const { userInfo, matchHistory, online } = data;
+    const { userInfo, matchHistory, online, on_game } = data;
     const [updated, setUpdated] = React.useState(true);
     const [one, setOne] = React.useState(false);
     const [two, setTwo] = React.useState(false);
@@ -73,6 +73,14 @@ const ProfilePage = () => {
         for (let i = 0; i < online.length; i++) {
             const user = online[i];
             if (user.user_id.toString() === user_id.toString()) return true;
+        }
+        return false;
+    };
+
+    const isOnGame = (user_id: string) => {
+        for (let i = 0; i < on_game.length; i++) {
+            const user = on_game[i];
+            if (user && user.toString() === user_id.toString()) return true;
         }
         return false;
     };
@@ -162,6 +170,7 @@ const ProfilePage = () => {
                                     name={userInfo?.user_name}
                                     avatar={userInfo?.user_avatar}
                                     isOnline={isOnline(userInfo?.user_id)}
+                                    isOnGame={isOnGame(userInfo?.user_id)}
                                 />
 
                                 <Line maxW="10rem" />

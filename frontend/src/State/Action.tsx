@@ -47,6 +47,11 @@ export const setOnlineUsers = (data: any) => ({
     payload: data,
 });
 
+export const setOnGameUsers = (data: any) => ({
+    type: 'ON_GAME_USERS',
+    payload: data,
+});
+
 export const storeUserId = (data: any) => ({
     type: 'USER_ID',
     payload: data,
@@ -72,4 +77,13 @@ export const twoFacQrCode = (data: any) => ({
 
 export const clearTwoFacQrCode = () => ({
     type: 'CLEAR_TWO_FAC_QRCODE',
+});
+
+export const gameWithFriend = (data: any) => ({
+    type: 'IM_PLAYING_WITH_FRIEND',
+    payload: data,
+});
+
+export const clearGameWithFriend = () => ({
+    type: 'CLEAR_IM_PLAYING_WITH_FRIEND',
 });
