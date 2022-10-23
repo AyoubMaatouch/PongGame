@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { group } from 'console';
 import React, { useContext } from 'react';
 import { MEMBERS, USER_URL } from '../constants';
 import { ChatContext } from '../State/ChatProvider';
@@ -7,9 +6,9 @@ import { GlobalContext } from '../State/Provider';
 
 const useMembers = () => {
     const { selectedChat } = useContext<any>(ChatContext);
-    const { setRoomMembers, roomMembers } = useContext<any>(ChatContext);
+    const { setRoomMembers } = useContext<any>(ChatContext);
     const [localMembers, setLocalMem] = React.useState<any>([]);
-    const { setUserMatchHistory, setLoader } = React.useContext<any>(GlobalContext);
+    const { setLoader } = React.useContext<any>(GlobalContext);
 
     React.useEffect(() => {
         axios
@@ -17,7 +16,6 @@ const useMembers = () => {
             .then((res: any) => {
                 const ids = [];
                 for (var i = 0; i < res.data.length; i++) {
-                    // console.log("role", res.data[i]?.prev);
                     ids.push({
                         id: res.data[i]?.userId,
                         role: res.data[i]?.prev,
@@ -51,6 +49,7 @@ const useMembers = () => {
                 .finally(() => setLoader(false));
             setRoomMembers(members);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localMembers]);
 };
 

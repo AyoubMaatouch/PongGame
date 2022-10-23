@@ -284,7 +284,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     // check the score
     checkScore(room_name: string, players_name1: string, players_name2: string) {
-        if (this.rooms[room_name].players[players_name1].score === 5000 || this.rooms[room_name].players[players_name2].score === 5000) {
+        if (this.rooms[room_name].players[players_name1].score === 5 || this.rooms[room_name].players[players_name2].score === 5) {
             // clear the interval
             clearInterval(this.rooms[room_name].intervalID);
 

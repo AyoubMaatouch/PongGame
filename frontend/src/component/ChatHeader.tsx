@@ -1,10 +1,8 @@
-import React, { useContext, useEffect } from 'react';
-import { Avatar, AvatarBadge, HStack, Icon, Spacer, Text, VStack } from '@chakra-ui/react';
 import { ArrowBackIcon } from '@chakra-ui/icons';
-import { GlobalContext } from '../State/Provider';
+import { Avatar, HStack, Spacer, Text, VStack } from '@chakra-ui/react';
+import React, { useContext } from 'react';
 import { ChatContext } from '../State/ChatProvider';
-import { motion } from 'framer-motion';
-import { RiPingPongFill } from 'react-icons/ri';
+import { GlobalContext } from '../State/Provider';
 
 type Props = {
     avatarName: string;
