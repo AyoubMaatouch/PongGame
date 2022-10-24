@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 //import { Account } from './entity/account.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
+import internal from 'stream';
 const speakeasy = require('speakeasy');
 
 @Injectable()
@@ -127,11 +128,12 @@ async deleteTwoFa(user_id : string)
 		return await this.prisma.user.findUnique({ where: { user_login: String(login) } });
 	}
 
-	signToken(userLogin: string, twofa : boolean, enable : boolean) {
+	signToken(userLogin: string, userId : Number, twofa : boolean, enable : boolean) {
 		const payload = {
 			userLogin: userLogin,
+			userId: userId,
 			isAuth: twofa,
-            isEnabled:enable
+            isEnabled: enable
 		};
 
 		const accessToken = this.jwtService.sign(payload, {
@@ -142,6 +144,20 @@ async deleteTwoFa(user_id : string)
 		return {
 			access_token: accessToken,
 		};
+	}
+	verifyToken(accessToken: string) //https://www.npmjs.com/package/jsonwebtoken
+	{
+		try 
+		{
+			const payload = this.jwtService.verify(accessToken, {
+				secret: process.env.JWT_SECRET
+			})
+			return (payload);
+		}
+		catch (err)
+		{
+			return null;
+		}
 	}
 
 }

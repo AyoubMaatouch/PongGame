@@ -1,6 +1,6 @@
-export const SOCKET_STATUS = 'http://10.11.11.1:3004';
-export const SOCKET = 'http://10.11.11.1:3003';
-export const API = 'http://10.11.11.1:3001';
+export const SOCKET_STATUS = 'http://localhost:3004';
+export const SOCKET = 'http://localhost:3003';
+export const API = 'http://localhost:3001';
 export const FRIENDS_URL = API + '/user/friends';
 export const USER_URL = API + '/user/';
 export const GROUP = API + '/user/group/';

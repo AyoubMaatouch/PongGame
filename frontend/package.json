@@ -19,6 +19,7 @@
     "framer-motion": "^6.5.1",
     "qrcode": "^1.5.1",
     "react-animated-cursor": "^2.5.1",
+    "react-cookie": "^4.1.1",
     "react-dom": "^18.2.0",
     "react-efficient-cursor": "^2.0.0",
     "react-icons": "^4.6.0",

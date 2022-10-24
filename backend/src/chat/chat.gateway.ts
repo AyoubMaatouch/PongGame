@@ -1,5 +1,5 @@
 import { chatController } from './chat.controller';
-import { Logger } from '@nestjs/common';
+import { HttpException, Logger, UseGuards } from '@nestjs/common';
 import {
   OnGatewayInit,
   SubscribeMessage,
@@ -12,6 +12,9 @@ import {
 // <<<<<<< HEAD
 import { Socket, Server, Namespace } from 'socket.io';
 import { ChatService } from './chat.service';
+import { AuthGuard } from '@nestjs/passport';
+import { accessJwtStrategy } from '../auth/accessJwtStrategy';
+import { AuthService } from '../auth/auth.service';
 //https://gabrieltanner.org/blog/nestjs-realtime-chat/
 
 // @WebSocketGateway(3002, {
@@ -32,22 +35,36 @@ import { ChatService } from './chat.service';
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private ChatService: ChatService) {}
+  constructor(private ChatService: ChatService, private authService: AuthService) {}
   private logger: Logger = new Logger('ChatGateway BRRRR');
 
   @WebSocketServer()
   io: Namespace;
   prisma: any;
   muted: any[];
+  userId : number;
+
   afterInit(server: any) {
     this.logger.log('Init');
     this.muted = [];
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: Socket, ...args: any[]) {
   
     
     this.logger.log(`Client connected: ${client.id}`);
+    console.log("on connection ", client.handshake.headers?.authorization)
+
+	const token = await this.authService.verifyToken(client.handshake.headers?.authorization);
+	console.log(token);
+    if (!token)
+	{
+		console.log("TOKEN = NULL");
+	//	client.disconnect();
+		//throw new HttpException('Unauthorized', 403);
+	}
+	//this.userId = token.userId;
+    
   }
 
   handleDisconnect(client: any) {
@@ -71,14 +88,19 @@ export class ChatGateway
     }
     return false;
   }
+
+  @UseGuards(accessJwtStrategy)
   @SubscribeMessage('ping') // Equivalent to socket.on('msgToServer') listening to any 'msgToServer' event
   ping(client: Socket, payload: any) {
     console.log('ping(): ', payload);
-
+    console.log('jwt ', client.handshake.query);
     client.join(payload.room_id);
   }
   @SubscribeMessage('message')
   async message(client: Socket, payload: any) {
+
+
+    console.log("Message payload", payload);
     if (!this.isMuted(client, payload.userId)) {
       this.io.to(payload.room_id).emit('recieveMessage', payload);
       console.log('payload ', payload);

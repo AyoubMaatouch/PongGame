@@ -6,6 +6,8 @@ import { io } from 'socket.io-client';
 // import axios from 'axios';
 import { FRIENDS_URL, SOCKET, USER_URL } from '../constants';
 import { chatReducer } from '../reducers/chatReducer';
+import { Cookies } from 'react-cookie';
+const cookies = new Cookies();
 
 // @ts-ignore
 export const ChatContext = createContext();
@@ -26,8 +28,15 @@ const ChatProvider = ({ children }: Props) => {
         // dm: [],
     };
     const [state, dispatch] = useReducer<any>(chatReducer, InitialValues);
+    //Authorization: document.cookie.split('=')[1].split('%22')[3],
 
-    const socket = io(SOCKET + '/dm');
+    const socket = io(SOCKET + '/dm', {
+
+        extraHeaders: {
+            Authorization: document.cookie.split('=')[1].split('%22')[3],
+        }
+    }
+);
     useEffect(() => {
         return () => {
             socket.disconnect();

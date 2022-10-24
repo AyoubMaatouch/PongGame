@@ -6,6 +6,8 @@ import { SOCKET } from '../constants';
 import { io } from 'socket.io-client';
 import { GlobalContext } from '../State/Provider';
 import { newNotification } from '../State/Action';
+import {Cookies} from 'react-cookie'
+
 
 const MessageInput = () => {
     const globalDispatch = useContext<any>(GlobalContext).dispatch;
@@ -25,7 +27,12 @@ const MessageInput = () => {
                 message: typingMessage.trim(),
                 userId: userInfo.user_id,
             };
-            const socket = io(SOCKET + '/dm');
+            const socket = io(SOCKET + '/dm', {
+
+                extraHeaders: {
+                    Authorization: document.cookie.split('=')[1].split('%22')[3],
+                }
+            });
             socket.emit('message', payload);
             socket.on('imMuted', (payload: any) => {
                 globalDispatch(newNotification({ type: 'Error', message: 'You are muted for ' + payload.time + ' min' }));

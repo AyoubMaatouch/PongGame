@@ -11,6 +11,7 @@ import { DM, SOCKET } from '../constants';
 import { io } from 'socket.io-client';
 import { newNotification } from '../State/Action';
 import { GlobalContext } from '../State/Provider';
+import {Cookies} from 'react-cookie'
 
 function MessagingBox() {
     const { dispatch, state } = useContext<any>(ChatContext);
@@ -24,7 +25,11 @@ function MessagingBox() {
     else searchIndex = newGroups.findIndex((id: any) => selectedChat.id === id.id);
 
     useEffect(() => {
-        const socket = io(SOCKET + '/dm');
+        const socket = io(SOCKET + '/dm', {
+            extraHeaders: {
+                Authorization: document.cookie.split('=')[1].split('%22')[3],
+            }
+        });
 
         console.log('roomkjhkjhkjhDm', roomDm);
         console.log('selecgedChag', selectedChat.chat);

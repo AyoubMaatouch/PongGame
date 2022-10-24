@@ -12,6 +12,7 @@ const customExtractor = (req: Request) => {
     token = req.cookies['jwt']['access_token'];
   }
   return token;
+
 };
 
 @Injectable()

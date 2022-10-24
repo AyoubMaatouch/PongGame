@@ -50,11 +50,12 @@ export class AuthController {
       req.user.username,
       req.user.avatar,
     );
-    // console.log('Found ===>', found.two_authentication);
+     console.log('Found ===>', found.user_id);
     const twofa = !found.two_authentication ? true : false;
     // const enabled = twofa ? true : false;
     const accessToken = this.AuthService.signToken(
       req.user.username,
+      found.user_id,
       twofa,
       true,
     );
@@ -74,7 +75,6 @@ export class AuthController {
     @Res({ passthrough: true }) response: any,
   ) {
     const userInfo = await this.AuthService.findUserId(req.user['userLogin']);
-    // console.log('noool hna ', userInfo);
     const res = await this.AuthService.verify2fa(
       body.code,
       userInfo.two_authentication,
@@ -85,6 +85,7 @@ export class AuthController {
     response.clearCookie('jwt');
     const accessToken = this.AuthService.signToken(
       req.user['userLogin'],
+      req.user['userId'],
       true,
       true,
     );
