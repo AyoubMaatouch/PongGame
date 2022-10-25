@@ -57,11 +57,22 @@ const RoomSettings = ({ toggleSettings, roomId, oldRoomData }: Props) => {
         room_type: roomData.type,
       })
       .then((res) => {
-        window.location.reload();
-        // dispatch({
-        //   type: "SET_GROUPS",
-        //   data: [],
-        // })
+        // window.location.reload();
+        setSelectedChat(null)
+        dispatch({
+          type: "REMOVE_GROUP",
+          data: roomId,
+        })
+        dispatch({
+          type: "ADD_GROUP",
+          data: {
+            id: roomId,
+            name: roomData.name,
+            avatar: roomData.name,
+            type: roomData.type,
+            password: roomData.password,
+          }
+        })
       })
       .catch((err) => {
       });

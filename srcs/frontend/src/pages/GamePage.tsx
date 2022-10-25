@@ -63,12 +63,12 @@ export default function GamePage() {
         // ge the speeed
         const getTheSpeedMode = () => {
             const mode = params.speed_mode?.toLowerCase();
-            if (mode === 'easy') setSpeedMode(20);
-            else if (mode === 'normal') setSpeedMode(22);
-            else if (mode === 'hard') setSpeedMode(25);
+            if (mode === 'easy') setSpeedMode(15);
+            else if (mode === 'normal') setSpeedMode(17);
+            else if (mode === 'hard') setSpeedMode(20);
             else if (mode === 'f' && (opponent_id || playing_with_friend)) {
                 if (!playing_with_friend) setFriend(true);
-                setSpeedMode(20);
+                setSpeedMode(15);
             } else navigate(pagesContent.home.url);
         };
 
@@ -323,7 +323,7 @@ export default function GamePage() {
                         </HStack>
                     </Badge>
                 )}
-                <HStack spacing={2}>
+                <HStack spacing={2} mt={5}>
                     <Text>Use</Text>
                     <span>
                         <Kbd p={1}><Icon fontSize="LG" as={BsFillArrowUpSquareFill} /></Kbd>

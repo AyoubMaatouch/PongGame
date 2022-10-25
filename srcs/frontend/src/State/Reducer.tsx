@@ -75,6 +75,10 @@ export const GlobalReducer = (state: any, action: any) => {
         case 'CLEAR_IM_PLAYING_WITH_FRIEND':
             newState.playing_with_friend = null;
             break;
+        case 'CLEAR_USER_INFO':
+            newState.userInfo = null;
+            break;
+
         default:
             break;
     }

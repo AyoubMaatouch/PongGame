@@ -36,7 +36,7 @@ import { pagesContent } from '../constants';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Achievement } from '../component/Achievement';
 import TwofacAuth from '../component/TwofacAuth';
-import { clearMatchHistory } from '../State/Action';
+import { clearMatchHistory, clearUserInfo } from '../State/Action';
 import { getFriendInfo, getMatchHistory, getUserInfo, signOut, updatedProfile } from '../State/Api';
 import { GlobalContext } from '../State/Provider';
 
@@ -72,7 +72,7 @@ const ProfilePage = () => {
     const isOnline = (user_id: string) => {
         for (let i = 0; i < online.length; i++) {
             const user = online[i];
-            if (user.user_id.toString() === user_id.toString()) return true;
+            if (user.user_id.toString() === user_id?.toString()) return true;
         }
         return false;
     };
@@ -80,7 +80,7 @@ const ProfilePage = () => {
     const isOnGame = (user_id: string) => {
         for (let i = 0; i < on_game.length; i++) {
             const user = on_game[i];
-            if (user && user.toString() === user_id.toString()) return true;
+            if (user && user.toString() === user_id?.toString()) return true;
         }
         return false;
     };
@@ -116,6 +116,7 @@ const ProfilePage = () => {
 
         return () => {
             dispatch(clearMatchHistory());
+            dispatch(clearUserInfo());
         };
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -61,6 +61,10 @@ export const clearMatchHistory = () => ({
     type: 'CLEAR_MATCH_HISTORY',
 });
 
+export const clearUserInfo = () => ({
+    type: 'CLEAR_USER_INFO',
+});
+
 export const setOpponentId = (data: any) => ({
     type: 'OPPONENT_ID',
     payload: data,

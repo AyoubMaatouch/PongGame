@@ -102,7 +102,7 @@ export default function MainRoomDetails({ toggleNewMembers, toggleSettings, isAd
             </HStack>
             <VStack pt={'1.5%'} h={'100%'} overflow={'auto'} w={'100%'} alignItems={'left'} px={5}>
                 {newGroups[searchIndex].avatar && <Image h="20em" src={newGroups[searchIndex].avatar} />}
-                <Text>Memebers</Text>
+                <Text>Members</Text>
                 {newMembers.length ? (
                     newMembers.map((member: any, index: any) => (
                         <ChannelMemeber
