@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  db:
+      image: postgres 
+      restart: always
+      ports:
+          - "5432:5432"
+      environment:
+          POSTGRES_USER: pong
+          POSTGRES_PASSWORD: pong
+          POSTGRES_DB: pongdb
+  backend:
+    image: node:16
+    restart: always
+    ports:
+      - "3001:3001"
+      - "3003:3003"
+      - "3004:3004"
+      - "5555:5555"
+    env_file:
+     - ./.env
+    volumes:
+      - ./srcs/backend:/app
+    command: /bin/bash run.sh
+    working_dir: /app
+    depends_on:
+      - db
+      
+  frontend:
+    image: node
+    restart: always
+    ports:
+         - "3000:3000"
+    volumes:
+      - ./srcs/frontend:/app
+    env_file:
+     - ./.env
+    command: /bin/bash run.sh
+    # command: npm install --force && npm start
+    working_dir: /app
+    depends_on:
+      - backend
