@@ -75,8 +75,18 @@ export class UsersService {
         try {
             const check = await this.prisma.blocked_users.deleteMany({
                 where: {
-                    userId: Number(user),
-                    blocked_id: Number(friend_id),
+                
+                    OR: [
+                        {
+                            userId: Number(user),
+                            blocked_id: Number(friend_id),
+                        },
+                        {
+                            userId: Number(friend_id),
+                            blocked_id: Number(user),
+                        },
+                    ],
+                   
                 },
             });
             const update = await this.prisma.friend.create({
