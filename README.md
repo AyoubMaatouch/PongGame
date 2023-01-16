@@ -21,7 +21,6 @@ PonGame was made using these following Technologies:
 # Screenshots
 
 ![signinblack](imgs/SigninBlack.png)
-![selectgameblack](imgs/selectgameblack.png)
 ![profileblack](imgs/profileblack.png)
 ![editprofilewhite](imgs/editprofilewhite.png)
 ![2fablack](imgs/2fablack.png)
