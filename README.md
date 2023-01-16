@@ -31,7 +31,7 @@ PonGame was made using these following Technologies:
 ![gameblack](imgs/gameblack.png)
 ![profileblack2](imgs/profileblack2.png)
 
-  # MADE BY
+  # Made by
   
   <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
