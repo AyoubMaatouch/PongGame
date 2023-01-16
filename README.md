@@ -28,3 +28,20 @@ PonGame was made using these following Technologies:
 ![selectgameblack](imgs/selectgameblack.png)
 ![gameblack](imgs/gameblack.png)
 ![profileblack2](imgs/profileblack2.png)
+
+  # MADE BY
+  
+  <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/MaroIsLife/"><img src="https://avatars.githubusercontent.com/u/26790542?v=4" width="100px;" alt=""/><br /><sub><b>Marouane Ougnou</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/AyoubMaatouch/"><img src="https://avatars.githubusercontent.com/u/48140672?v=4" width="100px;" alt=""/><br /><sub><b>Ayoub Maatouch</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/mallah-elmehdi/"><img src="https://avatars.githubusercontent.com/u/56451490?v=4" width="100px;" alt=""/><br /><sub><b>Mehdi El Mallah</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/yssefnoam/"><img src="https://avatars.githubusercontent.com/u/36737715?v=4" width="100px;" alt=""/><br /><sub><b>Youssef Noam</b></sub></a><br /></td>
+  </tr>
+</table>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
