@@ -18,7 +18,7 @@ PonGame was made using these following Technologies:
 # Build and Run
 - **Replace the .env-sample fields and rename the file to .env**
 - **Using ``docker-compose up`` run the build and wait patiently**
-- **Go to ``HOST`` and ``PORT`` that you inserted in .env and ENJOY**
+- **Go to http://``$HOST``:``$PORT`` that you inserted in .env and ENJOY**
 
 # Screenshots
 
