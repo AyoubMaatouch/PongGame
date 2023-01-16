@@ -4,7 +4,7 @@
   
 # PonGame
   
-PonGame is a webapplication made using ReactJS and NestJS where you can play or watch pong with players among other things such as moderated chatting rooms, private messages, friends list, profile customization, a JWT/2fa system for security, a match-making system and a spectating system to watch your friends play against each other.
+PonGame is a webapplication made using ReactJS and NestJS where you can play or watch pong with players among other things such as moderated chatting rooms, private messages, friends list, Achievements, profile customization, a JWT/2fa system for security, a match-making system and a spectating system to watch your friends play against each other.
 
 PonGame was made using these following Technologies:
 - **ReactJS**
